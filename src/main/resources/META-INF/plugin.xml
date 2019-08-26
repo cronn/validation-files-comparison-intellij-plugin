@@ -3,6 +3,8 @@
     <name>Validation-File Comparison</name>
     <vendor email="borstelmann.ayk@gmail.com" url="https://www.cronn.de">Cronn GmbH</vendor>
 
+    <depends>com.intellij.modules.platform</depends>
+
     <description><![CDATA[
         <a href="https://github.com/cronn-de/validation-files-comparison-intellij-plugin">Plugin on GitHub</a> |
         <a href="https://www.cronn.de">Cronn GmbH Website</a>
