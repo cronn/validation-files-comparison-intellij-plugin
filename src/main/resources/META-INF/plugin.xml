@@ -1,0 +1,49 @@
+<idea-plugin>
+    <id>de.cronn.validation-files-diff</id>
+    <name>Validation-File Comparison</name>
+    <vendor email="borstelmann.ayk@gmail.com" url="https://www.cronn.de">Cronn GmbH</vendor>
+
+    <description><![CDATA[
+        <a href="https://github.com/cronn-de/validation-files-comparison-intellij-plugin">Plugin on GitHub</a> |
+        <a href="https://www.cronn.de">Cronn GmbH Website</a>
+        <br/>
+        <br/>
+        This plugin enables you to open the built-in Intellij-IDEA diff-viewer to compare validation- and output-files in the current project or module using a configurable keyboard shortcut.
+        ]]>
+    </description>
+
+    <change-notes><![CDATA[
+        <p>1.0:</p>
+        <ul>
+            <li>Initial release of the 'Validation-File Comparison' plugin.</li>
+        </ul>
+        ]]>
+    </change-notes>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectConfigurable groupId="tools" displayName="Validation-File Comparison Plugin"
+                             id="preference.ValidationDiffSettingsConfigurable"
+                             instance="de.cronn.validation_files_diff.ValidationDiffSettingsConfigurable"/>
+
+        <projectService serviceInterface="de.cronn.validation_files_diff.ValidationDiffProjectOptionsProvider"
+                        serviceImplementation="de.cronn.validation_files_diff.impl.ValidationDiffProjectOptionsProviderImpl"/>
+        <applicationService serviceInterface="de.cronn.validation_files_diff.ValidationDiffApplicationOptionsProvider"
+                            serviceImplementation="de.cronn.validation_files_diff.impl.ValidationDiffApplicationOptionsProviderImpl"/>
+    </extensions>
+
+    <actions>
+        <action id="de.cronn.validation_files_diff.action.ValidationDiffAction"
+                class="de.cronn.validation_files_diff.action.ValidationDiffAction" text="Validation-File Comparison"
+                description="Open the built-in intellij-diff viewer for validation- vs. output-file directory for the current module."
+                icon="AllIcons.Actions.Diff">
+            <keyboard-shortcut keymap="$default" first-keystroke="shift alt V"/>
+            <add-to-group group-id="CompareActions"/>
+            <add-to-group group-id="EditorPopupMenu" relative-to-action="CompareClipboardWithSelection" anchor="after"/>
+            <add-to-group group-id="ProjectViewPopupMenu" relative-to-action="CompareFileWithEditor"
+                          anchor="after"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" relative-to-action="CompareClipboardWithSelection"
+                          anchor="after"/>
+            <add-to-group group-id="TestTreePopupMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
