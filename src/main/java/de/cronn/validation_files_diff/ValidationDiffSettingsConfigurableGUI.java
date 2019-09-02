@@ -54,14 +54,6 @@ public class ValidationDiffSettingsConfigurableGUI {
 		globalSettingsPanel.setBorder(IdeBorderFactory.createTitledBorder("Application settings"));
 	}
 
-	private static <E> void setupComboboxDefaultValue(@NotNull JComboBox<E> jComboBox, @NotNull Supplier<E> defaultValueSupplier) {
-		final E defaultValue = defaultValueSupplier.get();
-
-		jComboBox.addActionListener((e) -> {
-			jComboBox.setForeground(defaultValue.equals(getSelectedItemFromJComboBox(jComboBox)) ? getDefaultValueColor() : getChangedValueColor());
-		});
-	}
-
 	private static void setupTextFieldDefaultValue(@NotNull JTextField textField, @NotNull Supplier<String> defaultValueSupplier) {
 		String defaultPath = defaultValueSupplier.get();
 		if (StringUtil.isEmptyOrSpaces(defaultPath)) return;
@@ -113,6 +105,9 @@ public class ValidationDiffSettingsConfigurableGUI {
 	}
 
 	private void setupListeners() {
+		setupTextFieldDefaultValue(outputDirPath, () -> ValidationDiffProjectOptionsProvider.DEFAULT_OUTPUT_DIRECTORY);
+		setupTextFieldDefaultValue(validationDirPath, () -> ValidationDiffProjectOptionsProvider.DEFAULT_VALIDATION_DIRECTORY);
+
 		validationSide.addActionListener(togglingActionListener(validationSide, outputSide));
 		outputSide.addActionListener(togglingActionListener(outputSide, validationSide));
 
@@ -139,11 +134,6 @@ public class ValidationDiffSettingsConfigurableGUI {
 	}
 
 	private void setupValues() {
-		setupTextFieldDefaultValue(outputDirPath, () -> ValidationDiffProjectOptionsProvider.DEFAULT_OUTPUT_DIRECTORY);
-		setupTextFieldDefaultValue(validationDirPath, () -> ValidationDiffProjectOptionsProvider.DEFAULT_VALIDATION_DIRECTORY);
-		setupComboboxDefaultValue(outputSide, () -> ValidationDiffApplicationOptionsProvider.DEFAULT_OUTPUT_SIDE);
-		setupComboboxDefaultValue(validationSide, () -> ValidationDiffApplicationOptionsProvider.DEFAULT_OUTPUT_SIDE == DiffSide.LEFT ? DiffSide.RIGHT : DiffSide.LEFT);
-
 		validationSide.addItem(DiffSide.LEFT);
 		validationSide.addItem(DiffSide.RIGHT);
 

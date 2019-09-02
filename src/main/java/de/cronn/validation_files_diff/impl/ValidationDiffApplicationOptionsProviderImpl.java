@@ -13,9 +13,9 @@ import de.cronn.validation_files_diff.ValidationDiffApplicationOptionsProvider;
 import de.cronn.validation_files_diff.helper.DiffSide;
 
 @State(
-	name = "ValidationDiffOptionsProvider",
+	name = "ValidationDiffApplicationOptionsProvider",
 	storages = {
-		@Storage("validation_diff.xml")
+		@Storage("validation-files-comparison.xml")
 	}
 )
 public class ValidationDiffApplicationOptionsProviderImpl implements ValidationDiffApplicationOptionsProvider, PersistentStateComponent<ValidationDiffApplicationOptionsProviderImpl.State> {
@@ -49,7 +49,7 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 
 	@Override
 	public boolean getShowNewOnSource() {
-		return Optional.ofNullable(state.showNewOnSource).orElse(DEFAULT_SHOW_NEW_ON_SOURCE);
+		return state.showNewOnSource;
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 
 	@Override
 	public boolean getShowNewOnTarget() {
-		return Optional.ofNullable(state.showNewOnTarget).orElse(DEFAULT_SHOW_NEW_ON_TARGET);
+		return state.showNewOnTarget;
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 
 	@Override
 	public boolean getShowEqual() {
-		return Optional.ofNullable(state.showEqual).orElse(DEFAULT_SHOW_EQUAL);
+		return state.showEqual;
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 
 	@Override
 	public boolean getShowDifferent() {
-		return Optional.ofNullable(state.showDifferent).orElse(DEFAULT_SHOW_DIFFERENT);
+		return state.showDifferent;
 	}
 
 	@Override
@@ -87,12 +87,20 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 		state.showDifferent = showDifferent;
 	}
 
-	static class State {
-		DiffSide outputSide;
-		Boolean showNewOnSource;
-		Boolean showNewOnTarget;
-		Boolean showEqual;
-		Boolean showDifferent;
+	public static class State {
+		public State() {
+			outputSide = DEFAULT_OUTPUT_SIDE;
+			showNewOnTarget = DEFAULT_SHOW_NEW_ON_TARGET;
+			showNewOnSource = DEFAULT_SHOW_NEW_ON_SOURCE;
+			showEqual = DEFAULT_SHOW_EQUAL;
+			showDifferent = DEFAULT_SHOW_DIFFERENT;
+		}
+
+		public DiffSide outputSide;
+		public boolean showNewOnSource;
+		public boolean showNewOnTarget;
+		public boolean showEqual;
+		public boolean showDifferent;
 	}
 
 }

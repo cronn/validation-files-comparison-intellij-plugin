@@ -15,9 +15,9 @@
     </description>
 
     <change-notes><![CDATA[
-        <p>1.0:</p>
+        <p>1.1.1:</p>
         <ul>
-            <li>Initial release of the 'Validation-File Comparison' plugin.</li>
+            <li>Fix bug which resulted in only saving settings for this session and deleting them afterward.</li>
         </ul>
         ]]>
     </change-notes>
