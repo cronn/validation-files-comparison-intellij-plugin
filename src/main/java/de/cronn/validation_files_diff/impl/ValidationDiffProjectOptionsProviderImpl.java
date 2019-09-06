@@ -32,7 +32,7 @@ public class ValidationDiffProjectOptionsProviderImpl implements ValidationDiffP
 
 	@Override
 	public String getRelativeValidationDirPath() {
-		return Optional.ofNullable(state.relativeValidationDirPath).orElse(DEFAULT_VALIDATION_DIRECTORY);
+		return state.relativeValidationDirPath;
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class ValidationDiffProjectOptionsProviderImpl implements ValidationDiffP
 
 	@Override
 	public String getRelativeOutputDirPath() {
-		return Optional.ofNullable(state.relativeOutputDirPath).orElse(DEFAULT_OUTPUT_DIRECTORY);
+		return state.relativeOutputDirPath;
 	}
 
 	@Override
@@ -50,9 +50,14 @@ public class ValidationDiffProjectOptionsProviderImpl implements ValidationDiffP
 		state.relativeOutputDirPath = relativeOutputDirPath;
 	}
 
-	static class State {
-		String relativeValidationDirPath;
-		String relativeOutputDirPath;
+	public static class State {
+		public State() {
+			relativeOutputDirPath = DEFAULT_OUTPUT_DIRECTORY;
+			relativeValidationDirPath = DEFAULT_VALIDATION_DIRECTORY;
+		}
+
+		public String relativeValidationDirPath;
+		public String relativeOutputDirPath;
 	}
 
 }
