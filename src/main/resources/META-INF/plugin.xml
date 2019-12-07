@@ -15,9 +15,9 @@
     </description>
 
     <change-notes><![CDATA[
-        <p>1.1.1:</p>
+        <p>1.2:</p>
         <ul>
-            <li>Fix bug which resulted in only saving settings for this session and deleting them afterward.</li>
+            <li>Make this plugin compatible to Idea 2019.3</li>
         </ul>
         ]]>
     </change-notes>
