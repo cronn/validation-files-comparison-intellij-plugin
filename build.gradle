@@ -29,6 +29,11 @@ intellij {
 	pluginName 'Validation-File Comparison'
 }
 
+patchPluginXml {
+	sinceBuild '192'
+	untilBuild ''
+}
+
 dependencies {
 	testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
 	testCompile group: 'junit', name: 'junit', version: '4.12'
