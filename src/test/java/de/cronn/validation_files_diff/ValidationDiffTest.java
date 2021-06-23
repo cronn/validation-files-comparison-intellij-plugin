@@ -171,11 +171,11 @@ public class ValidationDiffTest extends TestCase {
 		PowerMockito.mockStatic(DirDiffManager.class);
 		PowerMockito.mockStatic(LocalFileSystem.class);
 
-		PowerMockito.when(ModuleManager.getInstance(any())).thenReturn(moduleManager);
-		PowerMockito.when(ValidationDiffApplicationOptionsProvider.getInstance()).thenReturn(applicationSettings);
-		PowerMockito.when(ValidationDiffProjectOptionsProvider.getInstance(eq(project))).thenReturn(projectSettings);
-		PowerMockito.when(DirDiffManager.getInstance(eq(project))).thenReturn(dirDiffManager);
-		PowerMockito.when(LocalFileSystem.getInstance()).thenReturn(fileSystem);
+		PowerMockito.when(ModuleManager.getInstance(any())).thenAnswer(invocation -> moduleManager);
+		PowerMockito.when(ValidationDiffApplicationOptionsProvider.getInstance()).thenAnswer(invocation -> applicationSettings);
+		PowerMockito.when(ValidationDiffProjectOptionsProvider.getInstance(eq(project))).thenAnswer(invocation -> projectSettings);
+		PowerMockito.when(DirDiffManager.getInstance(eq(project))).thenAnswer(invocation -> dirDiffManager);
+		PowerMockito.when(LocalFileSystem.getInstance()).thenAnswer(invocation -> fileSystem);
 
 		validationDiff = spy(new ValidationDiff(project, virtualFile));
 		doReturn(moduleAnalyser).when(validationDiff).getModuleAnalyser(any(), any());
