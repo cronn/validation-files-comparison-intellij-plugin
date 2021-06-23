@@ -1,7 +1,6 @@
 package de.cronn.validation_files_diff;
 
-import com.intellij.openapi.components.ServiceManager;
-
+import com.intellij.openapi.application.ApplicationManager;
 import de.cronn.validation_files_diff.helper.DiffSide;
 
 public interface ValidationDiffApplicationOptionsProvider {
@@ -12,7 +11,7 @@ public interface ValidationDiffApplicationOptionsProvider {
 	boolean DEFAULT_SHOW_DIFFERENT = true;
 
 	static ValidationDiffApplicationOptionsProvider getInstance() {
-		return ServiceManager.getService(ValidationDiffApplicationOptionsProvider.class);
+		return ApplicationManager.getApplication().getService(ValidationDiffApplicationOptionsProvider.class);
 	}
 
 	DiffSide getOutputSide();

@@ -1,5 +1,6 @@
 package de.cronn.validation_files_diff;
 
+import com.intellij.openapi.application.ApplicationManager;
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.openapi.components.ServiceManager;
@@ -10,7 +11,7 @@ public interface ValidationDiffProjectOptionsProvider {
 	String DEFAULT_VALIDATION_DIRECTORY = "data/test/validation";
 
 	static ValidationDiffProjectOptionsProvider getInstance(@NotNull Project project) {
-		return ServiceManager.getService(project, ValidationDiffProjectOptionsProvider.class);
+		return project.getService(ValidationDiffProjectOptionsProvider.class);
 	}
 
 	String getRelativeValidationDirPath();
