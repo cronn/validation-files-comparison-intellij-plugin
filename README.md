@@ -11,17 +11,17 @@ configurable keyboard shortcut.
 ## Getting Started
 
 ### TLDR
-####Build  project
+#### Build  project
 ```
 ./gradlew build
 ```
 
-####Start IntelliJ instance with plugin installed
+#### Start IntelliJ instance with plugin installed
 ```
 ./gradlew runIde
 ```
 
-####Test plugin for compatibility issues
+#### Test plugin for compatibility issues
 ```
 ./gradlew runPluginVerifier
 ```
