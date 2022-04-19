@@ -1,6 +1,7 @@
 [![CI](https://github.com/cronn/validation-files-comparison-intellij-plugin/actions/workflows/gradle.yml/badge.svg?branch=master)](https://github.com/cronn/validation-files-comparison-intellij-plugin/actions/workflows/gradle.yml)
 [![JetBrains Plugin](https://img.shields.io/jetbrains/plugin/v/12931-validation-file-comparison.svg)](https://plugins.jetbrains.com/plugin/12931-validation-file-comparison/)
 [![Apache 2.0](https://img.shields.io/github/license/cronn-de/validation-files-comparison-intellij-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Valid Gradle Wrapper](https://github.com/cronn/validation-files-comparison-intellij-plugin/workflows/Validate%20Gradle%20Wrapper/badge.svg)](https://github.com/cronn/validation-files-comparison-intellij-plugin/actions/workflows/gradle-wrapper-validation.yml)
 
 # Validation-File Comparison #
 
