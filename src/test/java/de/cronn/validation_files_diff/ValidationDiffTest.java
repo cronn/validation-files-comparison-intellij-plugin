@@ -7,25 +7,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.intellij.ide.diff.DiffElement;
 import com.intellij.ide.diff.DiffErrorElement;
 import com.intellij.ide.diff.DirDiffSettings;
+import com.intellij.mock.MockApplication;
 import com.intellij.mock.MockModule;
+import com.intellij.mock.MockProject;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diff.DirDiffManager;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleManager;
-import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 
 import de.cronn.validation_files_diff.helper.DiffSide;
 import de.cronn.validation_files_diff.helper.ModuleAnalyser;
@@ -33,25 +29,27 @@ import de.cronn.validation_files_diff.impl.ValidationDiffApplicationOptionsProvi
 import de.cronn.validation_files_diff.impl.ValidationDiffProjectOptionsProviderImpl;
 import junit.framework.TestCase;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ModuleRootManager.class, ModuleManager.class, ModuleUtil.class, ValidationDiffProjectOptionsProvider.class, ValidationDiffApplicationOptionsProvider.class, DirDiffManager.class, LocalFileSystem.class })
 public class ValidationDiffTest extends TestCase {
 
 	private ValidationDiff validationDiff;
-	private Project project;
+	private ModuleAnalyser moduleAnalyser;
+	private MockProject project;
 	private Disposable disposable;
 	private VirtualFile virtualFile;
-	private ModuleManager moduleManager;
 	private DirDiffManager dirDiffManager;
 	private LocalFileSystem fileSystem;
-	private ValidationDiffProjectOptionsProvider projectSettings;
 	private ValidationDiffApplicationOptionsProvider applicationSettings;
-	private ModuleAnalyser moduleAnalyser;
 
 	@Override
 	@BeforeEach
 	public void setUp() {
 		setupGeneralMocks();
+	}
+
+	@Override
+	public void tearDown() {
+		project = null;
+		Disposer.dispose(disposable);
 	}
 
 	public void testShowDiff_outputSideChange() {
@@ -141,7 +139,6 @@ public class ValidationDiffTest extends TestCase {
 		assertThat(diffElement.getName()).isEqualTo(path.toString());
 	}
 
-
 	public void testGetDirDiffElementFromPath() {
 		Path path = Paths.get("some/path/things");
 		DiffElement diffElement = mock(DiffElement.class);
@@ -154,30 +151,27 @@ public class ValidationDiffTest extends TestCase {
 	}
 
 	private void setupGeneralMocks() {
-		project = mock(Project.class);
-		disposable = mock(Disposable.class);
 		virtualFile = mock(VirtualFile.class);
-		moduleManager = mock(ModuleManager.class);
 		dirDiffManager = mock(DirDiffManager.class);
+		VirtualFileManager virtualFileManager = mock(VirtualFileManager.class);
 		fileSystem = mock(LocalFileSystem.class);
 		moduleAnalyser = mock(ModuleAnalyser.class);
 
-		projectSettings = new ValidationDiffProjectOptionsProviderImpl();
+		disposable = Disposer.newDisposable();
+		MockApplication application = MockApplication.setUp(disposable);
+		project = new MockProject(application.getPicoContainer(), disposable);
+
 		applicationSettings = new ValidationDiffApplicationOptionsProviderImpl();
+		application.registerService(ValidationDiffApplicationOptionsProvider.class, applicationSettings);
 
-		PowerMockito.mockStatic(ModuleManager.class);
-		PowerMockito.mockStatic(ValidationDiffProjectOptionsProvider.class);
-		PowerMockito.mockStatic(ValidationDiffApplicationOptionsProvider.class);
-		PowerMockito.mockStatic(DirDiffManager.class);
-		PowerMockito.mockStatic(LocalFileSystem.class);
+		doReturn(fileSystem).when(virtualFileManager).getFileSystem(LocalFileSystem.PROTOCOL);
+		application.registerService(VirtualFileManager.class, virtualFileManager);
 
-		PowerMockito.when(ModuleManager.getInstance(any())).thenAnswer(invocation -> moduleManager);
-		PowerMockito.when(ValidationDiffApplicationOptionsProvider.getInstance()).thenAnswer(invocation -> applicationSettings);
-		PowerMockito.when(ValidationDiffProjectOptionsProvider.getInstance(eq(project))).thenAnswer(invocation -> projectSettings);
-		PowerMockito.when(DirDiffManager.getInstance(eq(project))).thenAnswer(invocation -> dirDiffManager);
-		PowerMockito.when(LocalFileSystem.getInstance()).thenAnswer(invocation -> fileSystem);
+		project.registerService(ValidationDiffProjectOptionsProvider.class, new ValidationDiffProjectOptionsProviderImpl());
+		project.registerService(DirDiffManager.class, dirDiffManager);
 
 		validationDiff = spy(new ValidationDiff(project, virtualFile));
 		doReturn(moduleAnalyser).when(validationDiff).getModuleAnalyser(any(), any());
 	}
+
 }
