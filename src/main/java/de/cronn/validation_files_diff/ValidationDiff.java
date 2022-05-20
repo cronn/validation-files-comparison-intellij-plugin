@@ -18,6 +18,7 @@ import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
@@ -111,11 +112,17 @@ public class ValidationDiff {
 	@NotNull
 	DiffElement getDirDiffElementFromPath(Path path) {
 		DiffElement firstElement;
-		VirtualFile file = LocalFileSystem.getInstance().findFileByIoFile(path.toFile());
+		VirtualFile file = getLocalFileSystem().findFileByIoFile(path.toFile());
 		firstElement = DirDiffManager.getInstance(project).createDiffElement(file);
 		if (firstElement == null) {
 			firstElement = new DiffErrorElement(path.toString(), path.toString());
 		}
 		return firstElement;
+	}
+
+	private LocalFileSystem getLocalFileSystem() {
+		return (LocalFileSystem) VirtualFileManager
+				.getInstance()
+				.getFileSystem(LocalFileSystem.PROTOCOL);
 	}
 }

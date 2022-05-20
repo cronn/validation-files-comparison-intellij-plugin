@@ -9,21 +9,35 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.intellij.mock.MockApplication;
 import com.intellij.mock.MockModule;
 import com.intellij.mock.MockVirtualFile;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 
 import junit.framework.TestCase;
 
 public class ModuleAnalyserTest extends TestCase {
 
+	private Disposable disposable;
+
+	@Override
+	public void setUp() {
+		disposable = Disposer.newDisposable();
+		MockApplication.setUp(disposable);
+	}
+
+	@Override
+	public void tearDown() {
+		Disposer.dispose(disposable);
+	}
+
 	public void testFindNextNonLeafParentModule() {
 		Project project = mock(Project.class);
-		Disposable disposable = mock(Disposable.class);
 
 		ModuleRootManager moduleRootManager = mock(ModuleRootManager.class);
 
@@ -44,7 +58,6 @@ public class ModuleAnalyserTest extends TestCase {
 
 	public void testFindNextNonLeafParentModule_findRootModule() {
 		Project project = mock(Project.class);
-		Disposable disposable = mock(Disposable.class);
 
 		ModuleRootManager moduleRootManager = mock(ModuleRootManager.class);
 
@@ -64,7 +77,6 @@ public class ModuleAnalyserTest extends TestCase {
 
 	public void testFindNextNonLeafParentModule_currentIsRootModule() {
 		Project project = mock(Project.class);
-		Disposable disposable = mock(Disposable.class);
 
 		ModuleRootManager moduleRootManager = mock(ModuleRootManager.class);
 
@@ -100,7 +112,6 @@ public class ModuleAnalyserTest extends TestCase {
 
 	public void testGetMatchingContentRootForNextNonLeafModule() {
 		Project project = mock(Project.class);
-		Disposable disposable = mock(Disposable.class);
 
 		Module currentModule = new MockModule(project, disposable).setName("project.subproject.test");
 		Module searchedModule = new MockModule(project, disposable).setName("project.subproject");
