@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.jetbrains.intellij' version '1.0'
+	id 'org.jetbrains.intellij' version '1.9.0'
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -25,25 +25,27 @@ wrapper {
 }
 
 intellij {
-	version '2019.3'
-	pluginName = 'Validation-File Comparison'
+	version.set('2021.1')
+	pluginName.set('Validation-File Comparison')
 }
 
 patchPluginXml {
-	sinceBuild = '193'
-	untilBuild = ''
+	sinceBuild.set('211')
+	untilBuild.set('')
 }
 
 runPluginVerifier {
-	ideVersions = ["IU-193.7288.26", "IU-203.8084.24", "IU-211.7628.15"]
+	ideVersions.set([
+			"IU-211.7628.15",
+			"IU-222.4167.29"
+	])
 }
 
 
 dependencies {
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
-	testImplementation group: 'junit', name: 'junit', version: '4.12'
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.5.1'
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.3.2'
-	testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.13.2'
-	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.0.0'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.0'
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.9.0'
+	testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.23.1'
+	testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.8.0'
 }
