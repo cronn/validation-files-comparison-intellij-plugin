@@ -53,6 +53,8 @@ dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter-params")
 	testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.23.1'
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.8.0'
+	testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.8.0'
+	implementation 'de.cronn:validation-file-assertions:0.2.0'
 }
 
 test{
