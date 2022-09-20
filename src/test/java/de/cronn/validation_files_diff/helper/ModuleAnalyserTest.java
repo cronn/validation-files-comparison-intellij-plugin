@@ -1,14 +1,5 @@
 package de.cronn.validation_files_diff.helper;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.intellij.mock.MockApplication;
 import com.intellij.mock.MockModule;
 import com.intellij.mock.MockVirtualFile;
@@ -18,25 +9,30 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public class ModuleAnalyserTest extends TestCase {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+class ModuleAnalyserTest {
 
 	private Disposable disposable;
 
-	@Override
+	@BeforeEach
 	public void setUp() {
 		disposable = Disposer.newDisposable();
 		MockApplication.setUp(disposable);
 	}
 
-	@Override
-	public void tearDown() {
-		Disposer.dispose(disposable);
-	}
-
-	public void testFindNextNonLeafParentModule() {
+	@Test
+	void testFindNextNonLeafParentModule() {
 		Project project = mock(Project.class);
 
 		ModuleRootManager moduleRootManager = mock(ModuleRootManager.class);
@@ -56,7 +52,8 @@ public class ModuleAnalyserTest extends TestCase {
 		assertThat(secondLayerModuleOrGiveRootLayer).isEqualTo(searchedModule);
 	}
 
-	public void testFindNextNonLeafParentModule_findRootModule() {
+	@Test
+	void testFindNextNonLeafParentModule_findRootModule() {
 		Project project = mock(Project.class);
 
 		ModuleRootManager moduleRootManager = mock(ModuleRootManager.class);
@@ -75,7 +72,8 @@ public class ModuleAnalyserTest extends TestCase {
 		assertThat(secondLayerModuleOrGiveRootLayer).isEqualTo(searchedRootModule);
 	}
 
-	public void testFindNextNonLeafParentModule_currentIsRootModule() {
+	@Test
+	void testFindNextNonLeafParentModule_currentIsRootModule() {
 		Project project = mock(Project.class);
 
 		ModuleRootManager moduleRootManager = mock(ModuleRootManager.class);
@@ -93,7 +91,8 @@ public class ModuleAnalyserTest extends TestCase {
 		assertThat(secondLayerModuleOrGiveRootLayer).isEqualTo(currentSearchedModule);
 	}
 
-	public void testFindPossibleParentModules() {
+	@Test
+	void testFindPossibleParentModules() {
 		Project project = mock(Project.class);
 		Disposable disposable = mock(Disposable.class);
 
@@ -110,7 +109,8 @@ public class ModuleAnalyserTest extends TestCase {
 		assertThat(possibleParentModules).contains(projectModule, subprojectModule).doesNotContain(currentModule, junkModule1, junkModule2);
 	}
 
-	public void testGetMatchingContentRootForNextNonLeafModule() {
+	@Test
+	void testGetMatchingContentRootForNextNonLeafModule() {
 		Project project = mock(Project.class);
 
 		Module currentModule = new MockModule(project, disposable).setName("project.subproject.test");
