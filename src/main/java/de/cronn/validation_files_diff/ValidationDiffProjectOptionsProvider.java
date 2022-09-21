@@ -1,14 +1,12 @@
 package de.cronn.validation_files_diff;
 
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
+import de.cronn.assertions.validationfile.TestData;
 import org.jetbrains.annotations.NotNull;
 
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.project.Project;
-
 public interface ValidationDiffProjectOptionsProvider {
-	String DEFAULT_OUTPUT_DIRECTORY = "data/test/output";
-	String DEFAULT_VALIDATION_DIRECTORY = "data/test/validation";
+	String DEFAULT_OUTPUT_DIRECTORY = TestData.TEST_OUTPUT_DATA_DIR.toString();
+	String DEFAULT_VALIDATION_DIRECTORY = TestData.TEST_VALIDATION_DATA_DIR.toString();
 
 	static ValidationDiffProjectOptionsProvider getInstance(@NotNull Project project) {
 		return project.getService(ValidationDiffProjectOptionsProvider.class);
@@ -21,5 +19,4 @@ public interface ValidationDiffProjectOptionsProvider {
 	String getRelativeOutputDirPath();
 
 	void setRelativeOutputDirPath(String relativeOutputDirPath);
-
 }
