@@ -9,6 +9,7 @@ public interface ValidationDiffApplicationOptionsProvider {
 	boolean DEFAULT_SHOW_NEW_ON_TARGET = false;
 	boolean DEFAULT_SHOW_EQUAL = false;
 	boolean DEFAULT_SHOW_DIFFERENT = true;
+	boolean DEFAULT_RENAME_VALIDATION_FILE_ENABLED = true;
 
 	static ValidationDiffApplicationOptionsProvider getInstance() {
 		return ApplicationManager.getApplication().getService(ValidationDiffApplicationOptionsProvider.class);
@@ -33,4 +34,8 @@ public interface ValidationDiffApplicationOptionsProvider {
 	boolean getShowDifferent();
 
 	void setShowDifferent(boolean showDifferent);
+
+	void setRenameValidationFilesEnabled(boolean enabled);
+
+	boolean isRenamingValidationFilesEnabled();
 }
