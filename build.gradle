@@ -27,6 +27,7 @@ wrapper {
 intellij {
 	version.set('2022.2')
 	pluginName.set('Validation-File Comparison')
+	plugins = ['com.intellij.java']
 }
 
 patchPluginXml {
@@ -46,6 +47,8 @@ publishPlugin {
 }
 
 dependencies {
+	implementation 'de.cronn:validation-file-assertions:0.8.0'
+
 	testImplementation(platform('org.junit:junit-bom:5.10.2'))
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher") {
 		because("Only needed to run tests in a version of IntelliJ IDEA that bundles older versions")

@@ -4,6 +4,7 @@
     <vendor email="borstelmann.ayk@gmail.com" url="https://www.cronn.de">Cronn GmbH</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
 
     <description><![CDATA[
         <a href="https://github.com/cronn-de/validation-files-comparison-intellij-plugin">Plugin on GitHub</a> |
@@ -14,20 +15,23 @@
         cronn&#39;s <a href="https://github.com/cronn/validation-file-assertions">validation file assertion library</a>.<br>
         Compare and accept output and validation files without context switches.</p>
         <h2 id="usage">Usage</h2>
+        <h3 id="open-validation-file-comparison">Open Validation-File Comparison</h3>
         <p>Execute tests which use validation files, open the test itself or open the production code for it and run the the
         action <code>Validation-File Comparison</code>.</p>
         <p>You can find the action using ...</p>
-        <ul>
         <ul>
         <li>IntelliJ&#39;s Find Action (<code>Ctrl+Shift+A</code> / <code>⇧⌘A</code>) and search for <code>Validation File Comparison</code></li>
         <li><strong>View | Validation-File Comparison</strong></li>
         <li><strong>Right Click | Validation-File Comparison</strong></li>
         <li>Or the default shortcut <code>Alt+Shift+V</code> /<code>⌥⇧V</code></li>
         </ul>
-        </ul>
         <p>This plugin finds the corresponding (sub-)module for the current dialog and compares the two directories
         <code>[SUBMODULE-PATH]/data/test/validation</code> and <code>[SUBMODULE-PATH]/data/test/output</code>, which are the default directories
         for <a href="https://github.com/cronn/validation-file-assertions">validation file assertion library</a>.</p>
+        <h3 id="rename-tests-with-validation-files">Rename Tests with Validation Files</h3>
+        <p>When renaming a test with validation files the validation and output files will be suggested for renaming as well.
+        Simply use the rename refactoring of intellij (<code>Shift+F6</code> / <code>⇧F6</code>) and apply the suggested renaming as wished.
+        To disable this feature simply trigger the keybinding for the renaming twice and deselect &quot;Rename validation and output files&quot;.</p>
         <h3 id="configuration">Configuration</h3>
         <p>As for every IntelliJ action, you can configure your own shortcut for the <code>Validation-File Comparison</code> action.
         Simply go to <a href="jetbrains://idea/settings?name=Keymap"><strong>File | Settings | Keymap</strong></a> , search for <code>Validation-File
@@ -55,6 +59,8 @@
                         serviceImplementation="de.cronn.validation_files_diff.impl.ValidationDiffProjectOptionsProviderImpl"/>
         <applicationService serviceInterface="de.cronn.validation_files_diff.ValidationDiffApplicationOptionsProvider"
                             serviceImplementation="de.cronn.validation_files_diff.impl.ValidationDiffApplicationOptionsProviderImpl"/>
+        <automaticRenamerFactory
+                implementation="de.cronn.validation_files_diff.impl.ValidationFileAutomaticRenameFactory"/>
     </extensions>
 
     <actions>
