@@ -18,6 +18,8 @@ for `Validation-File Comparison` and click on install.
 
 ## Usage
 
+### Open Validation-File Comparison
+
 Execute tests which use validation files, open the test itself or open the production code for it and run the the
 action `Validation-File Comparison`.
 
@@ -31,6 +33,12 @@ You can find the action using ...
 This plugin finds the corresponding (sub-)module for the current dialog and compares the two directories
 `[SUBMODULE-PATH]/data/test/validation` and `[SUBMODULE-PATH]/data/test/output`, which are the default directories
 for [validation file assertion library](https://github.com/cronn/validation-file-assertions).
+
+### Rename Tests with Validation Files
+
+When renaming a test with validation files the validation and output files will be suggested for renaming as well. 
+Simply use the rename refactoring of intellij (`Shift+F6` / `⇧F6`) and apply the suggested renaming as wished.
+To disable this feature simply trigger the keybinding for the renaming twice and deselect "Rename validation and output files".
 
 ### Configuration
 

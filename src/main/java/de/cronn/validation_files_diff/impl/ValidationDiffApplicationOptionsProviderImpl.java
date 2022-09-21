@@ -87,6 +87,16 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 		state.showDifferent = showDifferent;
 	}
 
+	@Override
+	public void setRenameValidationFilesEnabled(boolean enabled) {
+		state.validationFileRenameEnabled = enabled;
+	}
+
+	@Override
+	public boolean isRenamingValidationFilesEnabled() {
+		return state.validationFileRenameEnabled;
+	}
+
 	public static class State {
 		public State() {
 			outputSide = DEFAULT_OUTPUT_SIDE;
@@ -94,6 +104,7 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 			showNewOnSource = DEFAULT_SHOW_NEW_ON_SOURCE;
 			showEqual = DEFAULT_SHOW_EQUAL;
 			showDifferent = DEFAULT_SHOW_DIFFERENT;
+			validationFileRenameEnabled = DEFAULT_RENAME_VALIDATION_FILE_ENABLED;
 		}
 
 		public DiffSide outputSide;
@@ -101,6 +112,7 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 		public boolean showNewOnTarget;
 		public boolean showEqual;
 		public boolean showDifferent;
+		public boolean validationFileRenameEnabled;
 	}
 
 }

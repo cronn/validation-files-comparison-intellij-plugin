@@ -1,25 +1,22 @@
 package de.cronn.validation_files_diff;
 
+import com.intellij.icons.AllIcons;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.IdeBorderFactory;
+import com.intellij.ui.components.JBTextField;
+import de.cronn.validation_files_diff.helper.DiffSide;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.MouseInputAdapter;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Supplier;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.MouseInputAdapter;
-
-import org.jetbrains.annotations.NotNull;
-
-import com.intellij.icons.AllIcons;
-import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.ui.DocumentAdapter;
-import com.intellij.ui.IdeBorderFactory;
-import com.intellij.ui.components.JBTextField;
-
-import de.cronn.validation_files_diff.helper.DiffSide;
 
 public class ValidationDiffSettingsConfigurableGUI {
 	private final ValidationDiffApplicationOptionsProvider applicationSettings;
@@ -79,10 +76,10 @@ public class ValidationDiffSettingsConfigurableGUI {
 	@NotNull
 	private static Color findColorByKey(String... colorKeys) {
 		return Arrays.stream(colorKeys)
-			.map(UIManager::getColor)
-			.filter(Objects::nonNull)
-			.findFirst()
-			.orElseThrow(() -> new RuntimeException("Can't find color for keys " + Arrays.toString(colorKeys)));
+				.map(UIManager::getColor)
+				.filter(Objects::nonNull)
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("Can't find color for keys " + Arrays.toString(colorKeys)));
 	}
 
 	private static <T> T getSelectedItemFromJComboBox(JComboBox<T> jComboBox) {
@@ -182,12 +179,12 @@ public class ValidationDiffSettingsConfigurableGUI {
 			return false;
 		}
 		return !(projectSettings.getRelativeOutputDirPath().equals(outputDirPath.getText())
-			&& projectSettings.getRelativeValidationDirPath().equals(validationDirPath.getText())
-			&& applicationSettings.getOutputSide().equals(getSelectedItemFromJComboBox(outputSide))
-			&& applicationSettings.getShowNewOnSource() == showNewSrc.isSelected()
-			&& applicationSettings.getShowDifferent() == showDifference.isSelected()
-			&& applicationSettings.getShowEqual() == showEqual.isSelected()
-			&& applicationSettings.getShowNewOnTarget() == showNewTarget.isSelected());
+				&& projectSettings.getRelativeValidationDirPath().equals(validationDirPath.getText())
+				&& applicationSettings.getOutputSide().equals(getSelectedItemFromJComboBox(outputSide))
+				&& applicationSettings.getShowNewOnSource() == showNewSrc.isSelected()
+				&& applicationSettings.getShowDifferent() == showDifference.isSelected()
+				&& applicationSettings.getShowEqual() == showEqual.isSelected()
+				&& applicationSettings.getShowNewOnTarget() == showNewTarget.isSelected());
 
 	}
 
