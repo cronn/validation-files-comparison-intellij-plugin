@@ -2,7 +2,6 @@ package de.cronn.validation_files_diff.action;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.intellij.execution.testframework.AbstractTestProxy;
-import com.intellij.execution.testframework.sm.runner.SMTestProxy;
 import com.intellij.ide.diff.DiffElement;
 import com.intellij.ide.diff.DirDiffSettings;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -13,22 +12,16 @@ import com.intellij.openapi.diff.impl.dir.DirDiffTableModel;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import de.cronn.assertions.validationfile.FileBasedComparisonFailure;
 import de.cronn.validation_files_diff.FilteredDirDiffSettings;
 import de.cronn.validation_files_diff.ValidationDiff;
-import org.apache.commons.lang3.StringUtils;
+import de.cronn.validation_files_diff.helper.TestProxyAnalyser;
 import org.jetbrains.annotations.NotNull;
-import org.opentest4j.MultipleFailuresError;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.function.Predicate.not;
+import static de.cronn.validation_files_diff.helper.TestProxyAnalyser.collectValidationFileNamesFromFileBasedComparisonFailures;
 
 public class ValidationDiffAction extends AnAction {
-
-	private static final String EXPECTED_FILENAME_PREFIX = "--- expected/";
 
 	@Override
 	public void actionPerformed(@NotNull AnActionEvent event) {
@@ -39,12 +32,13 @@ public class ValidationDiffAction extends AnAction {
 			return;
 		}
 
-		List<String> prioritisedValidationFiles = getPrioritisedValidationFiles(event);
+		AbstractTestProxy abstractTestProxy = event.getData(AbstractTestProxy.DATA_KEY);
+		List<String> fileBasedComparisonFailures = collectValidationFileNamesFromFileBasedComparisonFailures(abstractTestProxy);
 
-		ValidationDiff validationDiff = generateValidationDiff(project, file, prioritisedValidationFiles);
+		ValidationDiff validationDiff = generateValidationDiff(project, file);
 		DiffElement<?> leftDiffElement = validationDiff.getLeftDiffElement();
 		DiffElement<?> rightDiffElement = validationDiff.getRightDiffElement();
-		DirDiffSettings dirDiffSettings = validationDiff.getDirDiffSettings();
+		DirDiffSettings dirDiffSettings = validationDiff.getDirDiffSettings(fileBasedComparisonFailures);
 
 		final DirDiffTableModel model = new DirDiffTableModel(project, leftDiffElement, rightDiffElement, dirDiffSettings);
 		showDirDiff(project, model);
@@ -69,63 +63,12 @@ public class ValidationDiffAction extends AnAction {
 				.orElse(null);
 	}
 
-	private List<String> getPrioritisedValidationFiles(@NotNull AnActionEvent event) {
-		AbstractTestProxy abstractTestProxy = event.getData(AbstractTestProxy.DATA_KEY);
-		if (!(abstractTestProxy instanceof SMTestProxy)) {
-			return Collections.emptyList();
-		}
-
-		SMTestProxy smTestProxy = (SMTestProxy) abstractTestProxy;
-		return getFailingTestNames(smTestProxy);
-	}
-
 	private static void applyFilteredDiffSettingsIfNecessary(DirDiffSettings dirDiffSettings, DirDiffTableModel model) {
 		if (dirDiffSettings instanceof FilteredDirDiffSettings) {
 			FilteredDirDiffSettings filteredDirDiffSettings = (FilteredDirDiffSettings) dirDiffSettings;
 			filteredDirDiffSettings.setFailedValidationFileFilterEnabled(true);
 			model.applySettings();
 		}
-	}
-
-	private List<String> getFailingTestNames(SMTestProxy testProxy) {
-		return testProxy
-				.getRoot()
-				.getAllTests()
-				.stream()
-				.filter(AbstractTestProxy::isLeaf)
-				.filter(not(AbstractTestProxy::isInProgress))
-				.filter(not(AbstractTestProxy::isPassed))
-				.map(SMTestProxy::getErrorMessage)
-				.filter(Objects::nonNull)
-				.flatMap(this::splitIfMultipleFailuresError)
-				.map(this::calculateValidationFileName)
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.collect(Collectors.toList());
-	}
-
-	@VisibleForTesting
-	Stream<String> splitIfMultipleFailuresError(String localizedMessage) {
-		if (localizedMessage.startsWith(FileBasedComparisonFailure.class.getName())) {
-			String errorMessage = localizedMessage.replaceFirst(FileBasedComparisonFailure.class.getName() + ":\n", "");
-			return Stream.of(errorMessage);
-		}
-
-		if (localizedMessage.startsWith(MultipleFailuresError.class.getName())) {
-			String errorMessage = localizedMessage.replaceFirst(MultipleFailuresError.class.getName() + ":\n", "");
-
-			String[] errorsMessages = StringUtils.splitByWholeSeparator(errorMessage, "\n\t" + FileBasedComparisonFailure.class.getName() + ": ");
-			return Arrays.stream(errorsMessages, 1, errorsMessages.length);
-		}
-
-		return Stream.empty();
-	}
-
-	private Optional<String> calculateValidationFileName(String errorMessage) {
-		return Arrays.stream(errorMessage.split("\n"))
-				.filter(line -> line.startsWith(EXPECTED_FILENAME_PREFIX))
-				.map(line -> line.replaceFirst(EXPECTED_FILENAME_PREFIX, ""))
-				.findFirst();
 	}
 
 	@Override
@@ -138,13 +81,13 @@ public class ValidationDiffAction extends AnAction {
 			return;
 		}
 
-		ValidationDiff validationDiff = generateValidationDiff(project, file, List.of());
+		ValidationDiff validationDiff = generateValidationDiff(project, file);
 		event.getPresentation().setEnabledAndVisible(validationDiff.shouldBeEnabledAndVisible());
 	}
 
 	@VisibleForTesting
-	ValidationDiff generateValidationDiff(Project project, VirtualFile file, List<String> prioritisedValidationFiles) {
-		return new ValidationDiff(project, file, prioritisedValidationFiles);
+	ValidationDiff generateValidationDiff(Project project, VirtualFile file) {
+		return new ValidationDiff(project, file);
 	}
 
 }

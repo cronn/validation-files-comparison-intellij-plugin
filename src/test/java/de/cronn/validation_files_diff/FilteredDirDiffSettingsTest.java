@@ -9,10 +9,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class FilteredDirDiffSettingsTest {
 
-	private static final String FILENAME_FILTER_WITH_DIR = "dir/CustomDirDiffSettingsTest_testSetFilterWithMultipleFilters.json";
-	private static final String ESCAPED_FILENAME_FILTER_WITH_DIR = "dir\\/CustomDirDiffSettingsTest_testSetFilterWithMultipleFilters\\.json";
-	private static final String FILENAME_FILTER = "CustomDirDiffSettingsTest_testSetFilterWithMultipleFilters.json";
-	private static final String ESCAPED_FILENAME_FILTER = "CustomDirDiffSettingsTest_testSetFilterWithMultipleFilters\\.json";
+	private static final String FILENAME_FILTER_WITH_DIR = "dir/changedFile.json";
+	private static final String ESCAPED_FILENAME_FILTER_WITH_DIR = "dir\\/changedFile\\.json";
+	private static final String FILENAME_FILTER = "changedFile.json";
+	private static final String ESCAPED_FILENAME_FILTER = "changedFile\\.json";
 	private static final String SOME_FILTER = "dir/*";
 	private static final String ESCAPED_SOME_FILTER = "dir\\/.*";
 
@@ -28,7 +28,7 @@ class FilteredDirDiffSettingsTest {
 				.matches(p -> p.matcher(FILENAME_FILTER).matches())
 				.matches(p -> p.matcher(FILENAME_FILTER_WITH_DIR).matches())
 				.extracting(Pattern::pattern)
-				.isEqualTo(expectedRegex);
+				.isEqualTo(ESCAPED_FILENAME_FILTER + "|" + ESCAPED_FILENAME_FILTER_WITH_DIR);
 
 		assertThat(filteredDirDiffSettings.getFilter()).isNotEmpty();
 	}
@@ -40,13 +40,11 @@ class FilteredDirDiffSettingsTest {
 		filteredDirDiffSettings.setFilter(SOME_FILTER);
 		filteredDirDiffSettings.setFailedValidationFileFilterEnabled(true);
 
-		String expectedRegex = String.format("(?=%s|%s)%s", ESCAPED_FILENAME_FILTER, ESCAPED_FILENAME_FILTER_WITH_DIR, ESCAPED_SOME_FILTER);
-
 		assertThat(filteredDirDiffSettings.getFilterPattern())
 				.matches(p -> !p.matcher(FILENAME_FILTER).matches())
 				.matches(p -> p.matcher(FILENAME_FILTER_WITH_DIR).matches())
 				.extracting(Pattern::pattern)
-				.isEqualTo(expectedRegex);
+				.isEqualTo("(?=" + ESCAPED_FILENAME_FILTER + "|" + ESCAPED_FILENAME_FILTER_WITH_DIR + ")" + ESCAPED_SOME_FILTER);
 
 		assertThat(filteredDirDiffSettings.getFilter()).isNotEmpty();
 	}
