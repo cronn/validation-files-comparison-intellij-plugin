@@ -1,9 +1,5 @@
 package de.cronn.validation_files_diff;
 
-import java.nio.file.Path;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.intellij.ide.diff.DiffElement;
 import com.intellij.ide.diff.DiffErrorElement;
@@ -13,83 +9,94 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageType;
-import com.intellij.openapi.ui.popup.Balloon;
-import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import com.intellij.openapi.wm.StatusBar;
-import com.intellij.openapi.wm.WindowManager;
-import com.intellij.ui.awt.RelativePoint;
-
 import de.cronn.validation_files_diff.helper.DiffSide;
 import de.cronn.validation_files_diff.helper.ModuleAnalyser;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.nio.file.Path;
+import java.util.List;
 
 public class ValidationDiff {
 	private final Project project;
 	private final VirtualFile file;
+	private final ValidationDiffProjectOptionsProvider projectSettings;
+	private final ValidationDiffApplicationOptionsProvider applicationSettings;
+	private final Path modulePath;
 
 	public ValidationDiff(Project project, VirtualFile file) {
 		this.project = project;
 		this.file = file;
+		this.projectSettings = ValidationDiffProjectOptionsProvider.getInstance(this.project);
+		this.applicationSettings = ValidationDiffApplicationOptionsProvider.getInstance();
+		this.modulePath = findModulePath(project);
 	}
 
-	private static DirDiffSettings buildDirDiffSettingsFromApplicationSettings(ValidationDiffApplicationOptionsProvider settings) {
-		final DirDiffSettings dirDiffSettings = new DirDiffSettings();
-
-		dirDiffSettings.showNewOnTarget = settings.getShowNewOnTarget();
-		dirDiffSettings.showNewOnSource = settings.getShowNewOnSource();
-		dirDiffSettings.showEqual = settings.getShowEqual();
-		dirDiffSettings.showDifferent = settings.getShowDifferent();
-
-		return dirDiffSettings;
-	}
-
-	public void showDiff() {
-		final ValidationDiffProjectOptionsProvider projectSettings = ValidationDiffProjectOptionsProvider.getInstance(project);
-		final ValidationDiffApplicationOptionsProvider applicationSettings = ValidationDiffApplicationOptionsProvider.getInstance();
-
+	@Nullable
+	private Path findModulePath(Project project) {
 		Module currentModule = getModuleForFileCurrentFile();
 		if (currentModule == null) {
-			showWarningPopup("Please use modules in order to use this plugin");
-			return;
+			return null;
 		}
 
 		ModuleAnalyser moduleAnalyser = getModuleAnalyser(project, currentModule);
-		Path modulePath = moduleAnalyser.getMatchingContentRootForNextNonLeafModule();
+		return moduleAnalyser.getMatchingContentRootForNextNonLeafModule();
+	}
+
+	public DiffElement<?> getLeftDiffElement() {
 		if (modulePath == null) {
-			showWarningPopup("Could not find the right module to display");
-			return;
+			return null;
 		}
 
 		final Path outputDirPath = modulePath.resolve(projectSettings.getRelativeOutputDirPath());
 		final Path validationDirPath = modulePath.resolve(projectSettings.getRelativeValidationDirPath());
 
-		DiffElement firstElement;
-		DiffElement secondElement;
-
-		if (applicationSettings.getOutputSide() == DiffSide.LEFT) {
-			firstElement = getDirDiffElementFromPath(outputDirPath);
-			secondElement = getDirDiffElementFromPath(validationDirPath);
+		DiffSide outputSide = applicationSettings.getOutputSide();
+		if (outputSide == DiffSide.LEFT) {
+			return getDirDiffElementFromPath(outputDirPath);
 		} else {
-			firstElement = getDirDiffElementFromPath(validationDirPath);
-			secondElement = getDirDiffElementFromPath(outputDirPath);
+			return getDirDiffElementFromPath(validationDirPath);
+		}
+	}
+
+	public DiffElement<?> getRightDiffElement() {
+		if (modulePath == null) {
+			return null;
 		}
 
-		final DirDiffSettings dirDiffSettings = buildDirDiffSettingsFromApplicationSettings(applicationSettings);
-		DirDiffManager.getInstance(project).showDiff(firstElement, secondElement, dirDiffSettings);
+		final Path outputDirPath = modulePath.resolve(projectSettings.getRelativeOutputDirPath());
+		final Path validationDirPath = modulePath.resolve(projectSettings.getRelativeValidationDirPath());
+
+		DiffSide outputSide = applicationSettings.getOutputSide();
+		if (outputSide == DiffSide.RIGHT) {
+			return getDirDiffElementFromPath(outputDirPath);
+		} else {
+			return getDirDiffElementFromPath(validationDirPath);
+		}
+	}
+
+	@NotNull
+	public DirDiffSettings getDirDiffSettings(List<String> fileFilter) {
+		DirDiffSettings dirDiffSettings = makeInitialDirDiffSettings(fileFilter);
+		dirDiffSettings.showNewOnTarget = applicationSettings.getShowNewOnTarget();
+		dirDiffSettings.showNewOnSource = applicationSettings.getShowNewOnSource();
+		dirDiffSettings.showEqual = applicationSettings.getShowEqual();
+		dirDiffSettings.showDifferent = applicationSettings.getShowDifferent();
+		return dirDiffSettings;
+	}
+
+	private DirDiffSettings makeInitialDirDiffSettings(List<String> fileFilter) {
+		if (fileFilter != null && !fileFilter.isEmpty()) {
+			return new FilteredDirDiffSettings(fileFilter);
+		}
+		return new DirDiffSettings();
 	}
 
 	public boolean shouldBeEnabledAndVisible() {
-		final Module currentModule = getModuleForFileCurrentFile();
-		if (currentModule == null) {
-			return false;
-		}
-
-		ModuleAnalyser moduleAnalyser = getModuleAnalyser(project, currentModule);
-		final Path matchingContentRootsForNextNonLeafModule = moduleAnalyser.getMatchingContentRootForNextNonLeafModule();
-		return matchingContentRootsForNextNonLeafModule != null;
+		return this.modulePath != null;
 	}
 
 	@VisibleForTesting
@@ -103,15 +110,9 @@ public class ValidationDiff {
 	}
 
 	@VisibleForTesting
-	private void showWarningPopup(String htmlContent) {
-		StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
-		JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(htmlContent, MessageType.WARNING, null).setFadeoutTime(5000).createBalloon().show(RelativePoint.getCenterOf(statusBar.getComponent()), Balloon.Position.atRight);
-	}
-
-	@VisibleForTesting
 	@NotNull
-	DiffElement getDirDiffElementFromPath(Path path) {
-		DiffElement firstElement;
+	DiffElement<?> getDirDiffElementFromPath(Path path) {
+		DiffElement<?> firstElement;
 		VirtualFile file = getLocalFileSystem().findFileByIoFile(path.toFile());
 		firstElement = DirDiffManager.getInstance(project).createDiffElement(file);
 		if (firstElement == null) {
