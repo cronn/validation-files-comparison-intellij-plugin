@@ -56,7 +56,7 @@ public class PsiElementValidationFileFinder {
                 .filter(Objects::nonNull)
                 .map(VirtualFile::getChildren)
                 .flatMap(Arrays::stream)
-                .filter(validationFile -> validationFileNameStartsWith(validationFile, validationFilePrefix))
+                .filter(validationFile -> fileNameStartsWith(validationFile, validationFilePrefix))
                 .collect(Collectors.toList());
     }
 
@@ -65,8 +65,8 @@ public class PsiElementValidationFileFinder {
         return Stream.of(options.getRelativeOutputDirPath(), options.getRelativeValidationDirPath(), options.getRelativeTempDirPath());
     }
 
-    private boolean validationFileNameStartsWith(VirtualFile validationFile, String validationFilePrefix) {
-        return validationFile.getName().startsWith(validationFilePrefix);
+    private boolean fileNameStartsWith(VirtualFile file, String prefix) {
+        return file.getName().startsWith(prefix);
     }
 
     private String parseValidationFilePrefix() {
