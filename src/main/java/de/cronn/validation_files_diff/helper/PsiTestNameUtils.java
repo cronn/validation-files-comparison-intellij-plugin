@@ -13,13 +13,13 @@ public class PsiTestNameUtils {
 	}
 
 	public static String getTestClassName(PsiClass psiClass) {
-		String classHierarchy = psiClass.getName();
+		String nestingHierarchy = psiClass.getName();
 		PsiClass enclosingClass = psiClass.getContainingClass();
 		while (enclosingClass != null) {
-			classHierarchy = join(enclosingClass.getName(), classHierarchy);
+			nestingHierarchy = join(enclosingClass.getName(), nestingHierarchy);
 			enclosingClass = enclosingClass.getContainingClass();
 		}
-		return classHierarchy;
+		return nestingHierarchy;
 	}
 
 	private static String join(String element, String other) {
