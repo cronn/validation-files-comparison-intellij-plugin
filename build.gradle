@@ -36,7 +36,8 @@ patchPluginXml {
 
 runPluginVerifier {
 	ideVersions.set([
-			"IU-222.4167.29"
+			"IU-222.4167.29",
+			"IU-232.5150.116"
 	])
 }
 
