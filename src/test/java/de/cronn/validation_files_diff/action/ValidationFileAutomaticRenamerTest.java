@@ -141,21 +141,6 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 		return projectDir;
 	}
 
-	private void createSubModulesWithMainAndTestModules(String name, Module parent, Path parentDir) throws IOException {
-		Path subModulePath = parentDir.resolve(name);
-		Module subModule = createSubModule(parent, name, subModulePath);
-
-		createMainModule(subModulePath, subModule);
-		createTestModule(subModulePath, subModule);
-	}
-
-	private Module createSubModule(Module parent, String name, Path path) throws IOException {
-		Module subModule = createModule(parent.getName() + "." + name);
-		Files.createDirectories(path);
-		PsiTestUtil.addContentRoot(subModule, getVirtualFile(path.toFile()));
-		return subModule;
-	}
-
 	private void createTestModule(Path parentDirectory, Module parent) throws IOException {
 		Module testModule = createModule(parent.getName() + ".test");
 		Path testModuleRootPath = parentDirectory.resolve("src/test");

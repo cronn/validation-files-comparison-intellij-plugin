@@ -8,8 +8,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import de.cronn.validation_files_diff.ValidationDiff;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +31,7 @@ class ValidationDiffActionTest {
 		verify(validationDiff).showDiff();
 	}
 
+	@Test
 	public void testActionPerformed_nullSafe() {
 		ValidationDiffAction validationDiffAction = spy(ValidationDiffAction.class);
 		ValidationDiff validationDiff = mock(ValidationDiff.class);
