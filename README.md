@@ -35,11 +35,11 @@ for [validation file assertion library](https://github.com/cronn/validation-file
 ### Configuration
 
 As for every IntelliJ action, you can configure your own shortcut for the `Validation-File Comparison` action.
-Simply go to [**File/IntelliJ IDEA  | Settings | Keymap**](jetbrains://idea/settings?name=Keymap) , search for `Validation-File
-Comparison` and configure a new shortcut.
+Simply go to [**File/IntelliJ IDEA | Settings | Keymap**](jetbrains://idea/settings?name=Keymap) , search
+for `Validation-File Comparison` and configure a new shortcut.
 
 The behavior of the action can be configured in the dedicated settings dialog under
-[**File/IntelliJ IDEA | Settings | Tools | Validation-File Comparison 
+[**File/IntelliJ IDEA | Settings | Tools | Validation-File Comparison
 Plugin**](jetbrains://idea/settings?name=Tools--Validation-File+Comparison+Plugin).
 
 ## Development
@@ -65,6 +65,12 @@ Plugin**](jetbrains://idea/settings?name=Tools--Validation-File+Comparison+Plugi
 ```
 ./gradlew runPluginVerifier
 ```
+
+### Updating the Readme / plugin.xml
+
+If new readme sections regarding the usage of the plugin are added or existing ones are updated, make sure to also
+adjust the `<description>` in the `plugin.xml`.
+Ideally generate `html` content from this markdown file to ensure equal content (e.g. https://markdowntohtml.com/).
 
 ### Deployment
 
