@@ -10,6 +10,8 @@ public interface ValidationDiffProjectOptionsProvider {
 	String DEFAULT_OUTPUT_DIRECTORY = "data/test/output";
 	String DEFAULT_VALIDATION_DIRECTORY = "data/test/validation";
 
+	String DEFAULT_TEMP_DIRECTORY = "data/test/tmp";
+
 	static ValidationDiffProjectOptionsProvider getInstance(@NotNull Project project) {
 		return project.getService(ValidationDiffProjectOptionsProvider.class);
 	}
@@ -22,4 +24,7 @@ public interface ValidationDiffProjectOptionsProvider {
 
 	void setRelativeOutputDirPath(String relativeOutputDirPath);
 
+	default String getRelativeTempDirPath() {
+		return DEFAULT_TEMP_DIRECTORY;
+	};
 }

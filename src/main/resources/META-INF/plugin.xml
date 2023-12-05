@@ -4,6 +4,7 @@
     <vendor email="borstelmann.ayk@gmail.com" url="https://www.cronn.de">Cronn GmbH</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
 
     <description><![CDATA[
         <a href="https://github.com/cronn-de/validation-files-comparison-intellij-plugin">Plugin on GitHub</a> |
@@ -55,6 +56,8 @@
                         serviceImplementation="de.cronn.validation_files_diff.impl.ValidationDiffProjectOptionsProviderImpl"/>
         <applicationService serviceInterface="de.cronn.validation_files_diff.ValidationDiffApplicationOptionsProvider"
                             serviceImplementation="de.cronn.validation_files_diff.impl.ValidationDiffApplicationOptionsProviderImpl"/>
+        <automaticRenamerFactory
+                implementation="de.cronn.validation_files_diff.impl.ValidationFileAutomaticRenameFactory"/>
     </extensions>
 
     <actions>

@@ -1,14 +1,5 @@
 package de.cronn.validation_files_diff;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.mockito.ArgumentCaptor;
-
 import com.intellij.ide.diff.DiffElement;
 import com.intellij.ide.diff.DiffErrorElement;
 import com.intellij.ide.diff.DirDiffSettings;
@@ -22,14 +13,22 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-
 import de.cronn.validation_files_diff.helper.DiffSide;
 import de.cronn.validation_files_diff.helper.ModuleAnalyser;
 import de.cronn.validation_files_diff.impl.ValidationDiffApplicationOptionsProviderImpl;
 import de.cronn.validation_files_diff.impl.ValidationDiffProjectOptionsProviderImpl;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
-public class ValidationDiffTest extends TestCase {
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+public class ValidationDiffTest {
 
 	private ValidationDiff validationDiff;
 	private ModuleAnalyser moduleAnalyser;
@@ -40,18 +39,12 @@ public class ValidationDiffTest extends TestCase {
 	private LocalFileSystem fileSystem;
 	private ValidationDiffApplicationOptionsProvider applicationSettings;
 
-	@Override
 	@BeforeEach
 	public void setUp() {
 		setupGeneralMocks();
 	}
 
-	@Override
-	public void tearDown() {
-		project = null;
-		Disposer.dispose(disposable);
-	}
-
+	@Test
 	public void testShowDiff_outputSideChange() {
 
 		final Path modulePath = Paths.get("project/subproject/");
@@ -82,6 +75,7 @@ public class ValidationDiffTest extends TestCase {
 		assertThat(dirDiffSettings.showNewOnTarget).isEqualTo(applicationSettings.getShowNewOnTarget());
 	}
 
+	@Test
 	public void testShowDiff_defaultSettings() {
 		final Path modulePath = Paths.get("project/subproject/");
 
@@ -109,6 +103,7 @@ public class ValidationDiffTest extends TestCase {
 		assertThat(dirDiffSettings.showNewOnTarget).isEqualTo(applicationSettings.getShowNewOnTarget());
 	}
 
+	@Test
 	public void testShouldBeEnabledAndVisible() {
 		final MockModule currentModule = new MockModule(project, disposable);
 
@@ -128,6 +123,7 @@ public class ValidationDiffTest extends TestCase {
 		assertThat(validationDiff.shouldBeEnabledAndVisible()).isEqualTo(false);
 	}
 
+	@Test
 	public void testGetDirDiffElementFromPath_nullSafe() {
 		Path path = Paths.get("some/path/things");
 
@@ -135,10 +131,11 @@ public class ValidationDiffTest extends TestCase {
 		doReturn(null).when(dirDiffManager).createDiffElement(eq(virtualFile));
 
 		DiffElement diffElement = validationDiff.getDirDiffElementFromPath(path);
-		assertTrue(diffElement instanceof DiffErrorElement);
+		assertThat(diffElement instanceof DiffErrorElement).isTrue();
 		assertThat(diffElement.getName()).isEqualTo(path.toString());
 	}
 
+	@Test
 	public void testGetDirDiffElementFromPath() {
 		Path path = Paths.get("some/path/things");
 		DiffElement diffElement = mock(DiffElement.class);
@@ -159,7 +156,7 @@ public class ValidationDiffTest extends TestCase {
 
 		disposable = Disposer.newDisposable();
 		MockApplication application = MockApplication.setUp(disposable);
-		project = new MockProject(application.getPicoContainer(), disposable);
+		project = new MockProject(null, disposable);
 
 		applicationSettings = new ValidationDiffApplicationOptionsProviderImpl();
 		application.registerService(ValidationDiffApplicationOptionsProvider.class, applicationSettings);
