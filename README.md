@@ -23,10 +23,10 @@ action `Validation-File Comparison`.
 
 You can find the action using ...
 
-* IntelliJ's Find Action (Ctrl-Shift-A) and search for `Validation File Comparison`
+* IntelliJ's Find Action (`Ctrl+Shift+A` / `⇧⌘A`) and search for `Validation File Comparison`
 * **View | Validation-File Comparison**
 * **Right Click | Validation-File Comparison**
-* Or the default shortcut `Alt-Shift-V`
+* Or the default shortcut `Alt+Shift+V` /`⌥⇧V`
 
 This plugin finds the corresponding (sub-)module for the current dialog and compares the two directories
 `[SUBMODULE-PATH]/data/test/validation` and `[SUBMODULE-PATH]/data/test/output`, which are the default directories

@@ -18,10 +18,12 @@
         action <code>Validation-File Comparison</code>.</p>
         <p>You can find the action using ...</p>
         <ul>
-        <li>IntelliJ&#39;s Find Action (Ctrl-Shift-A) and search for <code>Validation File Comparison</code></li>
+        <ul>
+        <li>IntelliJ&#39;s Find Action (<code>Ctrl+Shift+A</code> / <code>⇧⌘A</code>) and search for <code>Validation File Comparison</code></li>
         <li><strong>View | Validation-File Comparison</strong></li>
         <li><strong>Right Click | Validation-File Comparison</strong></li>
-        <li>Or the default shortcut <code>Alt-Shift-V</code></li>
+        <li>Or the default shortcut <code>Alt+Shift+V</code> /<code>⌥⇧V</code></li>
+        </ul>
         </ul>
         <p>This plugin finds the corresponding (sub-)module for the current dialog and compares the two directories
         <code>[SUBMODULE-PATH]/data/test/validation</code> and <code>[SUBMODULE-PATH]/data/test/output</code>, which are the default directories
