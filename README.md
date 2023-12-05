@@ -5,28 +5,74 @@
 
 # Validation-File Comparison #
 
-This plugin enables you to open the built-in Intellij-IDEA diff-viewer to
-compare validation- and output-files in the current project or module using a
-configurable keyboard shortcut.
+IntelliJ plugin as extension to
+cronn's [validation file assertion library](https://github.com/cronn/validation-file-assertions).<br>
+Compare and accept output and validation files without context switches.
 
-## Getting Started
+![](doc/usage.gif)
 
-### TLDR
-#### Build  project
+## Installation
+
+Go to [**File/IntelliJ IDEA | Settings | Plugins**](jetbrains://idea/settings?name=Plugins), search in tab Marketplace
+for `Validation-File Comparison` and click on install.
+
+## Usage
+
+Execute tests which use validation files, open the test itself or open the production code for it and run the the
+action `Validation-File Comparison`.
+
+You can find the action using ...
+
+* IntelliJ's Find Action (`Ctrl+Shift+A` / `⇧⌘A`) and search for `Validation File Comparison`
+* **View | Validation-File Comparison**
+* **Right Click | Validation-File Comparison**
+* Or the default shortcut `Alt+Shift+V` /`⌥⇧V`
+
+This plugin finds the corresponding (sub-)module for the current dialog and compares the two directories
+`[SUBMODULE-PATH]/data/test/validation` and `[SUBMODULE-PATH]/data/test/output`, which are the default directories
+for [validation file assertion library](https://github.com/cronn/validation-file-assertions).
+
+### Configuration
+
+As for every IntelliJ action, you can configure your own shortcut for the `Validation-File Comparison` action.
+Simply go to [**File/IntelliJ IDEA | Settings | Keymap**](jetbrains://idea/settings?name=Keymap) , search
+for `Validation-File Comparison` and configure a new shortcut.
+
+The behavior of the action can be configured in the dedicated settings dialog under
+[**File/IntelliJ IDEA | Settings | Tools | Validation-File Comparison
+Plugin**](jetbrains://idea/settings?name=Tools--Validation-File+Comparison+Plugin).
+
+## Development
+
+### Getting Started
+
+#### TLDR
+
+##### Build  project
+
 ```
 ./gradlew build
 ```
 
-#### Start IntelliJ instance with plugin installed
+##### Start IntelliJ instance with plugin installed
+
 ```
 ./gradlew runIde
 ```
 
-#### Test plugin for compatibility issues
+##### Test plugin for compatibility issues
+
 ```
 ./gradlew runPluginVerifier
 ```
 
-## Deployment
+### Updating the Readme / plugin.xml
+
+If new readme sections regarding the usage of the plugin are added or existing ones are updated, make sure to also
+adjust the `<description>` in the `plugin.xml`.
+Ideally generate `html` content from this markdown file to ensure equal content (e.g. https://markdowntohtml.com/).
+
+### Deployment
+
 Before deployment make sure the plugin is compatible by running `./gradlew runPluginVerifier
 `. For instructions about the actual deployment see https://plugins.jetbrains.com/docs/intellij/deployment.html

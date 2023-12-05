@@ -10,7 +10,31 @@
         <a href="https://www.cronn.de">Cronn GmbH Website</a>
         <br/>
         <br/>
-        This plugin enables you to open the built-in Intellij-IDEA diff-viewer to compare validation- and output-files in the current project or module using a configurable keyboard shortcut.
+        <p>IntelliJ plugin as extension to
+        cronn&#39;s <a href="https://github.com/cronn/validation-file-assertions">validation file assertion library</a>.<br>
+        Compare and accept output and validation files without context switches.</p>
+        <h2 id="usage">Usage</h2>
+        <p>Execute tests which use validation files, open the test itself or open the production code for it and run the the
+        action <code>Validation-File Comparison</code>.</p>
+        <p>You can find the action using ...</p>
+        <ul>
+        <ul>
+        <li>IntelliJ&#39;s Find Action (<code>Ctrl+Shift+A</code> / <code>⇧⌘A</code>) and search for <code>Validation File Comparison</code></li>
+        <li><strong>View | Validation-File Comparison</strong></li>
+        <li><strong>Right Click | Validation-File Comparison</strong></li>
+        <li>Or the default shortcut <code>Alt+Shift+V</code> /<code>⌥⇧V</code></li>
+        </ul>
+        </ul>
+        <p>This plugin finds the corresponding (sub-)module for the current dialog and compares the two directories
+        <code>[SUBMODULE-PATH]/data/test/validation</code> and <code>[SUBMODULE-PATH]/data/test/output</code>, which are the default directories
+        for <a href="https://github.com/cronn/validation-file-assertions">validation file assertion library</a>.</p>
+        <h3 id="configuration">Configuration</h3>
+        <p>As for every IntelliJ action, you can configure your own shortcut for the <code>Validation-File Comparison</code> action.
+        Simply go to <a href="jetbrains://idea/settings?name=Keymap"><strong>File | Settings | Keymap</strong></a> , search for <code>Validation-File
+        Comparison</code> and configure a new shortcut.</p>
+        <p>The behavior of the action can be configured in the dedicated settings dialog under
+        <a href="jetbrains://idea/settings?name=Tools--Validation-File+Comparison+Plugin"><strong>File | Settings | Tools | Validation-File Comparison Plugin</strong></a>.</p>
+
         ]]>
     </description>
 
