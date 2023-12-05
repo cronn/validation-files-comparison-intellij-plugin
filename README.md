@@ -13,7 +13,7 @@ Compare and accept output and validation files without context switches.
 
 ## Installation
 
-Go to [**File | Settings | Plugins**](jetbrains://idea/settings?name=Plugins), search in tab Marketplace
+Go to [**File/IntelliJ IDEA | Settings | Plugins**](jetbrains://idea/settings?name=Plugins), search in tab Marketplace
 for `Validation-File Comparison` and click on install.
 
 ## Usage
@@ -35,11 +35,12 @@ for [validation file assertion library](https://github.com/cronn/validation-file
 ### Configuration
 
 As for every IntelliJ action, you can configure your own shortcut for the `Validation-File Comparison` action.
-Simply go to [**File | Settings | Keymap**](jetbrains://idea/settings?name=Keymap) , search for `Validation-File
+Simply go to [**File/IntelliJ IDEA  | Settings | Keymap**](jetbrains://idea/settings?name=Keymap) , search for `Validation-File
 Comparison` and configure a new shortcut.
 
-The behavior of the action can be configured in the dedicated settings dialog under 
-[**File | Settings | Tools | Validation-File Comparison Plugin**](jetbrains://idea/settings?name=Tools--Validation-File+Comparison+Plugin).
+The behavior of the action can be configured in the dedicated settings dialog under
+[**File/IntelliJ IDEA | Settings | Tools | Validation-File Comparison 
+Plugin**](jetbrains://idea/settings?name=Tools--Validation-File+Comparison+Plugin).
 
 ## Development
 
