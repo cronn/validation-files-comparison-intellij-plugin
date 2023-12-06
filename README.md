@@ -72,7 +72,10 @@ If new readme sections regarding the usage of the plugin are added or existing o
 adjust the `<description>` in the `plugin.xml`.
 Ideally generate `html` content from this markdown file to ensure equal content (e.g. https://markdowntohtml.com/).
 
-### Deployment
+### Publishing
 
-Before deployment make sure the plugin is compatible by running `./gradlew runPluginVerifier
-`. For instructions about the actual deployment see https://plugins.jetbrains.com/docs/intellij/deployment.html
+Publishing is done using the `publishPlugin` gradle task (using a valid access token) as described in [the documentation](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#publishing-plugin-with-gradle). 
+
+```shell
+./gradlew publishPlugin -Dorg.gradle.project.intellijPublishToken="<YOUR_TOKEN>"
+```
