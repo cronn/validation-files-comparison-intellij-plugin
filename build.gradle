@@ -41,6 +41,9 @@ runPluginVerifier {
 	])
 }
 
+publishPlugin {
+	token = System.getProperty("org.gradle.project.intellijPublishToken")
+}
 
 dependencies {
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
