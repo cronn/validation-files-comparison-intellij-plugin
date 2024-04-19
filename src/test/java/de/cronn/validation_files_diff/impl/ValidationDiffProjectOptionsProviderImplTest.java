@@ -1,68 +1,49 @@
 package de.cronn.validation_files_diff.impl;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.runners.Parameterized.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import de.cronn.validation_files_diff.ValidationDiffProjectOptionsProvider;
+class ValidationDiffProjectOptionsProviderImplTest {
 
-@RunWith(Parameterized.class)
-public class ValidationDiffProjectOptionsProviderImplTest {
-
-	private final String relativeValidationPath;
-	private final String relativeOutputPath;
 	private ValidationDiffProjectOptionsProviderImpl validationDiffProjectOptionsProvider;
 
-	public ValidationDiffProjectOptionsProviderImplTest(String relativeValidationPath, String relativeOutputPath) {
-
-		this.relativeValidationPath = relativeValidationPath;
-		this.relativeOutputPath = relativeOutputPath;
-	}
-
-	@Before
+	@BeforeEach
 	public void setUp() {
 		validationDiffProjectOptionsProvider = new ValidationDiffProjectOptionsProviderImpl();
 	}
 
-	@Parameters
-	public static Collection input() {
-		return Arrays.asList(new Object[][] {
-			{"data/test/validation","data/test/output"},
-			{"data/validation","data/output"},
-			{"",""}
-		});
+	@ParameterizedTest
+	@MethodSource("projectOptionsVariables")
+	void testGetterAndSetter(String relativeOutputPath, String relativeValidationPath) {
+		validationDiffProjectOptionsProvider.setRelativeValidationDirPath(relativeValidationPath);
+		validationDiffProjectOptionsProvider.setRelativeOutputDirPath(relativeOutputPath);
+
+		assertThat(validationDiffProjectOptionsProvider.getRelativeOutputDirPath()).isEqualTo(relativeOutputPath);
+		assertThat(validationDiffProjectOptionsProvider.getRelativeValidationDirPath()).isEqualTo(relativeValidationPath);
 	}
 
-	@Test
-	public void testGetterAndSetter() {
-		validationDiffProjectOptionsProvider.setRelativeValidationDirPath(this.relativeValidationPath);
-		validationDiffProjectOptionsProvider.setRelativeOutputDirPath(this.relativeOutputPath);
-
-		assertThat(validationDiffProjectOptionsProvider.getRelativeOutputDirPath()).isEqualTo(this.relativeOutputPath);
-		assertThat(validationDiffProjectOptionsProvider.getRelativeValidationDirPath()).isEqualTo(this.relativeValidationPath);
-	}
-
-	@Test
-	public void testLoadState() {
+	@ParameterizedTest
+	@MethodSource("projectOptionsVariables")
+	void testLoadState(String relativeOutputPath, String relativeValidationPath) {
 		ValidationDiffProjectOptionsProviderImpl.State state = new ValidationDiffProjectOptionsProviderImpl.State();
 		state.relativeOutputDirPath = relativeOutputPath;
 		state.relativeValidationDirPath = relativeValidationPath;
 
 		validationDiffProjectOptionsProvider.loadState(state);
 
-		assertThat(validationDiffProjectOptionsProvider.getRelativeOutputDirPath()).isEqualTo(this.relativeOutputPath);
-		assertThat(validationDiffProjectOptionsProvider.getRelativeValidationDirPath()).isEqualTo(this.relativeValidationPath);
+		assertThat(validationDiffProjectOptionsProvider.getRelativeOutputDirPath()).isEqualTo(relativeOutputPath);
+		assertThat(validationDiffProjectOptionsProvider.getRelativeValidationDirPath()).isEqualTo(relativeValidationPath);
 	}
 
-	@Test
-	public void testGetState() {
+	@ParameterizedTest
+	@MethodSource("projectOptionsVariables")
+	void testGetState(String relativeOutputPath, String relativeValidationPath) {
 		ValidationDiffProjectOptionsProviderImpl.State state = new ValidationDiffProjectOptionsProviderImpl.State();
 		state.relativeOutputDirPath = relativeOutputPath;
 		state.relativeValidationDirPath = relativeValidationPath;
@@ -70,7 +51,15 @@ public class ValidationDiffProjectOptionsProviderImplTest {
 		validationDiffProjectOptionsProvider.loadState(state);
 		final ValidationDiffProjectOptionsProviderImpl.State returnedState = validationDiffProjectOptionsProvider.getState();
 
-		assertThat(returnedState.relativeOutputDirPath).isNotNull().isEqualTo(this.relativeOutputPath);
-		assertThat(returnedState.relativeValidationDirPath).isNotNull().isEqualTo(this.relativeValidationPath);
+		assertThat(returnedState.relativeOutputDirPath).isNotNull().isEqualTo(relativeOutputPath);
+		assertThat(returnedState.relativeValidationDirPath).isNotNull().isEqualTo(relativeValidationPath);
+	}
+
+	public static Stream<Arguments> projectOptionsVariables() {
+		return Stream.of(
+				Arguments.of("data/test/validation", "data/test/output"),
+				Arguments.of("data/validation", "data/output"),
+				Arguments.of("", "")
+		);
 	}
 }
