@@ -1,15 +1,14 @@
 package de.cronn.validation_files_diff.action;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.google.common.annotations.VisibleForTesting;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-
 import de.cronn.validation_files_diff.ValidationDiff;
+import org.jetbrains.annotations.NotNull;
 
 public class ValidationDiffAction extends AnAction {
 
@@ -45,4 +44,8 @@ public class ValidationDiffAction extends AnAction {
 		return new ValidationDiff(project, file);
 	}
 
+	@Override
+	public @NotNull ActionUpdateThread getActionUpdateThread() {
+		return ActionUpdateThread.BGT;
+	}
 }
