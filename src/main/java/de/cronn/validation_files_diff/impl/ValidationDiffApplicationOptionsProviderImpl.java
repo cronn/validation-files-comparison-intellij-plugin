@@ -1,22 +1,20 @@
 package de.cronn.validation_files_diff.impl;
 
-import java.util.Optional;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-
 import de.cronn.validation_files_diff.ValidationDiffApplicationOptionsProvider;
 import de.cronn.validation_files_diff.helper.DiffSide;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 @State(
-	name = "ValidationDiffApplicationOptionsProvider",
-	storages = {
-		@Storage("validation-files-comparison.xml")
-	}
+		name = "ValidationDiffApplicationOptionsProvider",
+		storages = {
+				@Storage("validation-files-comparison.xml")
+		}
 )
 public class ValidationDiffApplicationOptionsProviderImpl implements ValidationDiffApplicationOptionsProvider, PersistentStateComponent<ValidationDiffApplicationOptionsProviderImpl.State> {
 
@@ -95,6 +93,11 @@ public class ValidationDiffApplicationOptionsProviderImpl implements ValidationD
 	@Override
 	public boolean isRenamingValidationFilesEnabled() {
 		return state.validationFileRenameEnabled;
+	}
+
+	@Override
+	public void reset() {
+		this.state = new State();
 	}
 
 	public static class State {

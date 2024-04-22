@@ -1,29 +1,22 @@
-package de.cronn.validation_files_diff.action;
+package de.cronn.validation_files_diff.impl;
 
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.impl.JavaPsiFacadeEx;
 import com.intellij.refactoring.rename.RenameProcessor;
 import com.intellij.refactoring.rename.naming.AutomaticRenamerFactory;
-import com.intellij.testFramework.HeavyPlatformTestCase;
-import com.intellij.testFramework.PsiTestUtil;
-import org.jetbrains.annotations.NotNull;
+import de.cronn.validation_files_diff.AbstractValidationFilePluginTest;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static de.cronn.assertions.validationfile.TestData.*;
-import static org.assertj.core.api.Assertions.assertThat;
+class ValidationFileAutomaticRenamerTest extends AbstractValidationFilePluginTest {
 
-public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
-
-	public void testRenameClass_renamesAllValidationFiles() throws IOException {
+	@Test
+	void testRenameClass_renamesAllValidationFiles() throws IOException {
 		Path projectDir = createDefaultJavaModuleStructure();
 
 		Path openedTestFile = projectDir.resolve("src/test/Test.java");
@@ -42,7 +35,7 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 
 		refreshFileSystem(projectDir);
 
-		PsiClass testClass = JavaPsiFacadeEx.getInstanceEx(getProject()).findClass("Test");
+		PsiClass testClass = JavaPsiFacadeEx.getInstanceEx(project).findClass("Test");
 
 		executeRename(testClass, "Test2");
 
@@ -50,7 +43,8 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 		assertValidationFileNotExistsDirectories(projectDir, "Test_findStuff.json");
 	}
 
-	public void testRenameClass_withDirectoryJoiningStrategy_renamesOnlyApplicableValidationFiles() throws IOException {
+	@Test
+	void testRenameClass_withDirectoryJoiningStrategy_renamesOnlyApplicableValidationFiles() throws IOException {
 		Path projectDir = createDefaultJavaModuleStructure();
 
 		Path openedTestFile = projectDir.resolve("src/test/Test.java");
@@ -69,7 +63,7 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 
 		refreshFileSystem(projectDir);
 
-		PsiClass testClass = JavaPsiFacadeEx.getInstanceEx(getProject()).findClass("Test");
+		PsiClass testClass = JavaPsiFacadeEx.getInstanceEx(project).findClass("Test");
 
 		executeRename(testClass, "Test2");
 
@@ -77,7 +71,8 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 		assertValidationFileNotExistsDirectories(projectDir, "Test/findStuff.json");
 	}
 
-	public void testRenameMethod_renamesAllValidationFiles() throws IOException {
+	@Test
+	void testRenameMethod_renamesAllValidationFiles() throws IOException {
 		Path projectDir = createDefaultJavaModuleStructure();
 
 		Path openedTestFile = projectDir.resolve("src/test/Test.java");
@@ -102,7 +97,7 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 
 		refreshFileSystem(projectDir);
 
-		PsiMethod testMethod = JavaPsiFacadeEx.getInstanceEx(getProject()).findClass("Test").findMethodsByName("testSomething", false)[0];
+		PsiMethod testMethod = JavaPsiFacadeEx.getInstanceEx(project).findClass("Test").findMethodsByName("testSomething", false)[0];
 
 		executeRename(testMethod, "testSomething2");
 
@@ -110,7 +105,8 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 		assertValidationFileNotExistsDirectories(projectDir, validationFileName);
 	}
 
-	public void testRenameMethod_withDirectoryJoiningStrategy_renamesOnlyApplicableValidationFiles() throws IOException {
+	@Test
+	void testRenameMethod_withDirectoryJoiningStrategy_renamesOnlyApplicableValidationFiles() throws IOException {
 		Path projectDir = createDefaultJavaModuleStructure();
 
 		Path openedTestFile = projectDir.resolve("src/test/Test.java");
@@ -135,7 +131,7 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 
 		refreshFileSystem(projectDir);
 
-		PsiMethod testMethod = JavaPsiFacadeEx.getInstanceEx(getProject()).findClass("Test").findMethodsByName("testSomething", false)[0];
+		PsiMethod testMethod = JavaPsiFacadeEx.getInstanceEx(project).findClass("Test").findMethodsByName("testSomething", false)[0];
 
 		executeRename(testMethod, "testSomething2");
 
@@ -143,78 +139,12 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 		assertValidationFileExistsInDirectories(projectDir, newValidationFileName);
 	}
 
-	@NotNull
-	private static Path getTempFileDirectory(Path projectDir) {
-		return projectDir.resolve(TEST_TEMPORARY_DATA_DIR);
-	}
-
-	@NotNull
-	private static Path getValidationFileDirectory(Path projectDir) {
-		return projectDir.resolve(TEST_VALIDATION_DATA_DIR);
-	}
-
-	@NotNull
-	private static Path getOutputFileDirectory(Path projectDir) {
-		return projectDir.resolve(TEST_OUTPUT_DATA_DIR);
-	}
-
-	private static void assertValidationFileNotExistsDirectories(Path projectDir, String filename) {
-		assertThat(getValidationFileDirectory(projectDir).resolve(filename)).doesNotExist();
-		assertThat(getOutputFileDirectory(projectDir).resolve(filename)).doesNotExist();
-	}
-
-	private static void assertValidationFileExistsInDirectories(Path projectDir, String filename) {
-		assertThat(getValidationFileDirectory(projectDir).resolve(filename)).exists().isEmptyFile();
-		assertThat(getOutputFileDirectory(projectDir).resolve(filename)).exists().isEmptyFile();
-	}
-
-	private static void createValidationFileInDirectories(Path projectDir, String validationFileName) throws IOException {
-		createDirectoryAndFileIfNecessary(getValidationFileDirectory(projectDir).resolve(validationFileName));
-		createDirectoryAndFileIfNecessary(getOutputFileDirectory(projectDir).resolve(validationFileName));
-	}
-
-	private static void createDirectoryAndFileIfNecessary(Path filename) throws IOException {
-		Files.createDirectories(filename.getParent());
-		Files.createFile(filename);
-	}
-
-	private void refreshFileSystem(Path projectDir) {
-		LocalFileSystem.getInstance().findFileByNioFile(projectDir).refresh(false, true);
-		PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
-	}
-
 	private void executeRename(PsiElement element, String newName) {
-		RenameProcessor renameProcessor = new RenameProcessor(getProject(), element, newName, false, false);
+		RenameProcessor renameProcessor = new RenameProcessor(project, element, newName, false, false);
 		for (AutomaticRenamerFactory factory : AutomaticRenamerFactory.EP_NAME.getExtensionList()) {
 			renameProcessor.addRenamerFactory(factory);
 		}
 		renameProcessor.run();
-	}
-
-	private Path createDefaultJavaModuleStructure() throws IOException {
-		VirtualFile testProjectStructure = createTestProjectStructure();
-		Path projectDir = testProjectStructure.toNioPath();
-
-		Module parent = getModule();
-
-		createMainModule(projectDir, parent);
-		createTestModule(projectDir, parent);
-
-		return projectDir;
-	}
-
-	private void createTestModule(Path parentDirectory, Module parent) throws IOException {
-		Module testModule = createModule(parent.getName() + ".test");
-		Path testModuleRootPath = parentDirectory.resolve("src/test");
-		Files.createDirectories(testModuleRootPath);
-		PsiTestUtil.addSourceRoot(testModule, getVirtualFile(testModuleRootPath.toFile()));
-	}
-
-	private void createMainModule(Path parentDirectory, Module parent) throws IOException {
-		Module mainModule = createModule(parent.getName() + ".main");
-		Path mainModuleRootPath = parentDirectory.resolve("src/main");
-		Files.createDirectories(mainModuleRootPath);
-		PsiTestUtil.addSourceRoot(mainModule, getVirtualFile(mainModuleRootPath.toFile()));
 	}
 
 }

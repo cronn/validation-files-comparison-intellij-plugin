@@ -1,112 +1,71 @@
 package de.cronn.validation_files_diff.action;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
-import de.cronn.validation_files_diff.ValidationDiff;
+import com.intellij.diff.requests.DiffRequest;
+import de.cronn.validation_files_diff.AbstractValidationDiffActionTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
-class ValidationDiffActionTest {
+class ValidationDiffActionTest extends AbstractValidationDiffActionTest {
 
-	@Test
-	void testActionPerformed() {
-		ValidationDiffAction validationDiffAction = spy(ValidationDiffAction.class);
-		ValidationDiff validationDiff = mock(ValidationDiff.class);
-		AnActionEvent anActionEvent = mock(AnActionEvent.class);
+	private Path validationDirectory;
+	private Path outputDirectory;
+	private Path projectDir;
 
-		Project project = mock(Project.class);
-		VirtualFile virtualFile = mock(VirtualFile.class);
+	@BeforeEach
+	@Override
+	public void setUp() throws IOException {
+		super.setUp();
 
-		doReturn(project).when(anActionEvent).getData(CommonDataKeys.PROJECT);
-		doReturn(virtualFile).when(anActionEvent).getData(CommonDataKeys.VIRTUAL_FILE);
-		doReturn(validationDiff).when(validationDiffAction).generateValidationDiff(any(), any());
+		projectDir = createDefaultJavaModuleStructure();
+		validationDirectory = Files.createDirectories(getValidationFileDirectory(projectDir));
+		outputDirectory = Files.createDirectories(getOutputFileDirectory(projectDir));
 
-		validationDiffAction.actionPerformed(anActionEvent);
-
-		verify(validationDiff).showDiff();
+		refreshFileSystem(projectDir);
 	}
 
 	@Test
-	void testActionPerformed_nullSafe() {
-		ValidationDiffAction validationDiffAction = spy(ValidationDiffAction.class);
-		ValidationDiff validationDiff = mock(ValidationDiff.class);
-		AnActionEvent anActionEvent = mock(AnActionEvent.class);
+	void testValidationFileDiffAction_triggerInSourceFile() throws Exception {
+		Path openedSourceFile = Files.createFile(projectDir.resolve("src/test/Test.java"));
 
-		Project project = mock(Project.class);
-		VirtualFile virtualFile = mock(VirtualFile.class);
+		executeValidationFileDiffActionInFile(openedSourceFile);
 
-		doReturn(null).doReturn(project).doReturn(null).when(anActionEvent).getData(CommonDataKeys.PROJECT);
-		doReturn(virtualFile).doReturn(null).doReturn(null).when(anActionEvent).getData(CommonDataKeys.VIRTUAL_FILE);
-		doReturn(validationDiff).when(validationDiffAction).generateValidationDiff(any(), any());
+		DiffRequest currentActiveRequest = diffManager.getCurrentActiveRequest();
+		assertThat(currentActiveRequest).isNotNull();
 
-		validationDiffAction.actionPerformed(anActionEvent);
-		verify(validationDiff, never()).showDiff();
-
-		validationDiffAction.actionPerformed(anActionEvent);
-		verify(validationDiff, never()).showDiff();
-
-		validationDiffAction.actionPerformed(anActionEvent);
-		verify(validationDiff, never()).showDiff();
+		assertThatLeftSide(currentActiveRequest, outputDirectory);
+		assertThatRightSide(currentActiveRequest, validationDirectory);
 	}
 
 	@Test
-	void testUpdate() {
-		final boolean toBeReturned = true;
+	void testValidationFileDiffAction_triggerInTestFile() throws Exception {
+		Path openedSourceFile = Files.createFile(projectDir.resolve("src/main/Main.java"));
 
-		ValidationDiffAction validationDiffAction = spy(ValidationDiffAction.class);
-		ValidationDiff validationDiff = mock(ValidationDiff.class);
-		AnActionEvent anActionEvent = mock(AnActionEvent.class);
-		Presentation presentation = new Presentation();
+		executeValidationFileDiffActionInFile(openedSourceFile);
 
-		Project project = mock(Project.class);
-		VirtualFile virtualFile = mock(VirtualFile.class);
+		DiffRequest currentActiveRequest = diffManager.getCurrentActiveRequest();
+		assertThat(currentActiveRequest).isNotNull();
 
-		doReturn(project).when(anActionEvent).getData(CommonDataKeys.PROJECT);
-		doReturn(virtualFile).when(anActionEvent).getData(CommonDataKeys.VIRTUAL_FILE);
-		doReturn(validationDiff).when(validationDiffAction).generateValidationDiff(any(), any());
-		doReturn(toBeReturned).when(validationDiff).shouldBeEnabledAndVisible();
-		doReturn(presentation).when(anActionEvent).getPresentation();
-
-		validationDiffAction.update(anActionEvent);
-
-		verify(validationDiff).shouldBeEnabledAndVisible();
-		assertThat(presentation.isEnabledAndVisible()).isEqualTo(toBeReturned);
+		assertThatLeftSide(currentActiveRequest, outputDirectory);
+		assertThatRightSide(currentActiveRequest, validationDirectory);
 	}
 
 	@Test
-	void testUpdate_projectNullSafe() {
-		final boolean toBeReturned = true;
+	void testValidationFileDiffAction_triggerInValidationFile() throws Exception {
+		Path openedSourceFile = Files.createFile(validationDirectory.resolve("test.txt"));
 
-		ValidationDiffAction validationDiffAction = spy(ValidationDiffAction.class);
-		ValidationDiff validationDiff = mock(ValidationDiff.class);
-		AnActionEvent anActionEvent = mock(AnActionEvent.class);
-		Presentation presentation = new Presentation();
+		executeValidationFileDiffActionInFile(openedSourceFile);
 
-		Project project = mock(Project.class);
-		VirtualFile virtualFile = mock(VirtualFile.class);
+		DiffRequest currentActiveRequest = diffManager.getCurrentActiveRequest();
+		assertThat(currentActiveRequest).isNotNull();
 
-		when(anActionEvent.getData(CommonDataKeys.PROJECT)).thenReturn(null).thenReturn(project).thenReturn(null);
-		doReturn(virtualFile).doReturn(null).doReturn(null).when(anActionEvent).getData(CommonDataKeys.VIRTUAL_FILE);
-		doReturn(validationDiff).when(validationDiffAction).generateValidationDiff(any(), any());
-		doReturn(toBeReturned).when(validationDiff).shouldBeEnabledAndVisible();
-		doReturn(presentation).when(anActionEvent).getPresentation();
-
-		validationDiffAction.update(anActionEvent);
-		verify(validationDiff, never()).shouldBeEnabledAndVisible();
-		assertThat(presentation.isEnabledAndVisible()).isFalse();
-
-		validationDiffAction.update(anActionEvent);
-		verify(validationDiff, never()).shouldBeEnabledAndVisible();
-		assertThat(presentation.isEnabledAndVisible()).isFalse();
-
-		validationDiffAction.update(anActionEvent);
-		verify(validationDiff, never()).shouldBeEnabledAndVisible();
-		assertThat(presentation.isEnabledAndVisible()).isFalse();
+		assertThatLeftSide(currentActiveRequest, outputDirectory);
+		assertThatRightSide(currentActiveRequest, validationDirectory);
 	}
 
 }

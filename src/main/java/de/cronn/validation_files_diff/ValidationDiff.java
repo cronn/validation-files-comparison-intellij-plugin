@@ -1,10 +1,9 @@
 package de.cronn.validation_files_diff;
 
-import java.nio.file.Path;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.google.common.annotations.VisibleForTesting;
+import com.intellij.diff.DiffManager;
+import com.intellij.diff.DiffRequestFactory;
+import com.intellij.diff.requests.ContentDiffRequest;
 import com.intellij.ide.diff.DiffElement;
 import com.intellij.ide.diff.DiffErrorElement;
 import com.intellij.ide.diff.DirDiffSettings;
@@ -22,9 +21,11 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
-
 import de.cronn.validation_files_diff.helper.DiffSide;
 import de.cronn.validation_files_diff.helper.ModuleAnalyser;
+import org.jetbrains.annotations.NotNull;
+
+import java.nio.file.Path;
 
 public class ValidationDiff {
 	private final Project project;
@@ -66,19 +67,24 @@ public class ValidationDiff {
 		final Path outputDirPath = modulePath.resolve(projectSettings.getRelativeOutputDirPath());
 		final Path validationDirPath = modulePath.resolve(projectSettings.getRelativeValidationDirPath());
 
-		DiffElement firstElement;
-		DiffElement secondElement;
+		Path firstPath;
+		Path secondPath;
 
 		if (applicationSettings.getOutputSide() == DiffSide.LEFT) {
-			firstElement = getDirDiffElementFromPath(outputDirPath);
-			secondElement = getDirDiffElementFromPath(validationDirPath);
+			firstPath = outputDirPath;
+			secondPath = validationDirPath;
 		} else {
-			firstElement = getDirDiffElementFromPath(validationDirPath);
-			secondElement = getDirDiffElementFromPath(outputDirPath);
+			firstPath = validationDirPath;
+			secondPath = outputDirPath;
 		}
 
-		final DirDiffSettings dirDiffSettings = buildDirDiffSettingsFromApplicationSettings(applicationSettings);
-		DirDiffManager.getInstance(project).showDiff(firstElement, secondElement, dirDiffSettings);
+		VirtualFile first = getLocalFileSystem().findFileByIoFile(firstPath.toFile());
+		VirtualFile second = getLocalFileSystem().findFileByIoFile(secondPath.toFile());
+
+		ContentDiffRequest fromFiles = DiffRequestFactory.getInstance().createFromFiles(project, first, second);
+		fromFiles.putUserData(DirDiffSettings.KEY, buildDirDiffSettingsFromApplicationSettings(applicationSettings));
+
+		DiffManager.getInstance().showDiff(project, fromFiles);
 	}
 
 	public boolean shouldBeEnabledAndVisible() {
