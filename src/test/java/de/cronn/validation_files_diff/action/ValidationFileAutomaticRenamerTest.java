@@ -50,6 +50,33 @@ public class ValidationFileAutomaticRenamerTest extends HeavyPlatformTestCase {
 		assertValidationFileNotExistsDirectories(projectDir, "Test_findStuff.json");
 	}
 
+	public void testRenameClass_withDirectoryJoiningStrategy_renamesOnlyApplicableValidationFiles() throws IOException {
+		Path projectDir = createDefaultJavaModuleStructure();
+
+		Path openedTestFile = projectDir.resolve("src/test/Test.java");
+		Files.createFile(openedTestFile);
+		Files.writeString(openedTestFile, "public class Test {}");
+
+		Path validationFileDirectory = getValidationFileDirectory(projectDir);
+		Path outputFileDirectory = getOutputFileDirectory(projectDir);
+		Path tempFileDirectory = getTempFileDirectory(projectDir);
+
+		Files.createDirectories(validationFileDirectory);
+		Files.createDirectories(outputFileDirectory);
+		Files.createDirectories(tempFileDirectory);
+
+		createValidationFileInDirectories(projectDir, "Test/findStuff.json");
+
+		refreshFileSystem(projectDir);
+
+		PsiClass testClass = JavaPsiFacadeEx.getInstanceEx(getProject()).findClass("Test");
+
+		executeRename(testClass, "Test2");
+
+		assertValidationFileExistsInDirectories(projectDir, "Test2/findStuff.json");
+		assertValidationFileNotExistsDirectories(projectDir, "Test/findStuff.json");
+	}
+
 	public void testRenameMethod_renamesAllValidationFiles() throws IOException {
 		Path projectDir = createDefaultJavaModuleStructure();
 

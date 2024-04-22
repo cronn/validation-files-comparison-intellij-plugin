@@ -4,7 +4,6 @@ import com.intellij.openapi.util.NlsContexts;
 import com.intellij.psi.*;
 import com.intellij.refactoring.rename.naming.AutomaticRenamer;
 import de.cronn.validation_files_diff.helper.PsiElementValidationFileFinder;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -30,17 +29,29 @@ public class ValidationFileAutomaticRenamer extends AutomaticRenamer {
 				.stream()
 				.map(psiManager::findFile)
 				.filter(Objects::nonNull)
-				.forEach(psiFile -> suggestToRenameValidationFile(psiFile, getNewName(psiFile.getName(), oldName, newName)));
+				.forEach(psiFile -> suggestFilenameChangeAlongFileTree(psiFile, oldName, newName));
 	}
 
-	@NotNull
+	private void suggestFilenameChangeAlongFileTree(PsiFile psiFile, String oldTestName, String newTestName) {
+		PsiFileSystemItem currentFileOrDirectory = psiFile;
+		while (currentFileOrDirectory != null) {
+			String name = currentFileOrDirectory.getName();
+			if (name.contains(oldTestName)) {
+				String newFileOrDirectoryName = getNewName(name, oldTestName, newTestName);
+				suggestToRenameFile(currentFileOrDirectory, newFileOrDirectoryName);
+				return;
+			}
+			currentFileOrDirectory = currentFileOrDirectory.getParent();
+		}
+	}
+
 	private static String getNewName(String currentName, String oldName, String newName) {
 		return currentName.replaceFirst(oldName, newName);
 	}
 
-	private void suggestToRenameValidationFile(PsiFile psiFile, String newFileName) {
-		myElements.add(psiFile);
-		suggestAllNames(psiFile.getName(), newFileName);
+	private void suggestToRenameFile(PsiFileSystemItem file, String newName) {
+		myElements.add(file);
+		suggestAllNames(file.getName(), newName);
 	}
 
 	@Override

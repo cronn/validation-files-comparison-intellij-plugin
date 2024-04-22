@@ -96,7 +96,8 @@ public final class PsiElementValidationFileFinder {
 
 		boolean parentsAreEqual = Objects.equals(actualValidationFileParent, expectedValidationFileParent);
 		boolean filenameStartsWithPrefix = actualValidationFilename.startsWith(expectedValidationFilenamePrefix);
-		return parentsAreEqual && filenameStartsWithPrefix;
+		boolean parentsAreEqualAndIsFilenamePrefix = parentsAreEqual && filenameStartsWithPrefix;
+		return parentsAreEqualAndIsFilenamePrefix || actualValidationFilePath.startsWith(expectedValidationFilePathPrefix);
 	}
 
 	private Stream<String> getValidationFileRelatedDirectories() {
