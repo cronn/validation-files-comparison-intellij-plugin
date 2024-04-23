@@ -42,7 +42,7 @@ public class ValidationFileAutomaticRenameFactory implements AutomaticRenamerFac
 			return false;
 		}
 
-		return PsiElementValidationFileFinder.of(element).hasCorrespondingValidationFiles();
+		return PsiElementValidationFileFinder.hasCorrespondingValidationFiles(element);
 	}
 
 }

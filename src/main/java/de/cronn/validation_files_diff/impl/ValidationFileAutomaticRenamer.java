@@ -1,11 +1,14 @@
 package de.cronn.validation_files_diff.impl;
 
 import com.intellij.openapi.util.NlsContexts;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.refactoring.rename.naming.AutomaticRenamer;
 import de.cronn.validation_files_diff.helper.PsiElementValidationFileFinder;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ValidationFileAutomaticRenamer extends AutomaticRenamer {
 
@@ -24,25 +27,19 @@ public class ValidationFileAutomaticRenamer extends AutomaticRenamer {
 		PsiManager psiManager = PsiManager.getInstance(element.getProject());
 
 		String oldName = psiNamedElement.getName();
-		PsiElementValidationFileFinder.of(element)
-				.findCorrespondingValidationFiles()
+		PsiElementValidationFileFinder
+				.find(element)
 				.stream()
-				.map(psiManager::findFile)
-				.filter(Objects::nonNull)
-				.forEach(psiFile -> suggestFilenameChangeAlongFileTree(psiFile, oldName, newName));
+				.map(virtualFile -> getFileSystemItem(psiManager, virtualFile))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.forEachOrdered(psiFileSystemItem -> suggestToRenameFile(psiFileSystemItem, getNewName(psiFileSystemItem.getName(), oldName, newName)));
 	}
 
-	private void suggestFilenameChangeAlongFileTree(PsiFile psiFile, String oldTestName, String newTestName) {
-		PsiFileSystemItem currentFileOrDirectory = psiFile;
-		while (currentFileOrDirectory != null) {
-			String name = currentFileOrDirectory.getName();
-			if (name.contains(oldTestName)) {
-				String newFileOrDirectoryName = getNewName(name, oldTestName, newTestName);
-				suggestToRenameFile(currentFileOrDirectory, newFileOrDirectoryName);
-				return;
-			}
-			currentFileOrDirectory = currentFileOrDirectory.getParent();
-		}
+	private Optional<PsiFileSystemItem> getFileSystemItem(PsiManager psiManager, VirtualFile virtualFile) {
+		return Stream.of(psiManager.findFile(virtualFile), psiManager.findDirectory(virtualFile))
+				.filter(Objects::nonNull)
+				.findFirst();
 	}
 
 	private static String getNewName(String currentName, String oldName, String newName) {

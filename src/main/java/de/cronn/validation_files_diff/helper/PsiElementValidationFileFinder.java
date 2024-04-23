@@ -9,121 +9,69 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
 import de.cronn.validation_files_diff.JoiningStrategy;
 import de.cronn.validation_files_diff.ValidationDiffProjectOptionsProvider;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.Set;
 
 public final class PsiElementValidationFileFinder {
 
-	private final Project project;
-	private final Module module;
-	private final PsiElement element;
-
-	private PsiElementValidationFileFinder(PsiElement element, Project project, Module module) {
-		this.project = project;
-		this.module = module;
-		this.element = element;
+	private PsiElementValidationFileFinder() {
 	}
 
-	public static PsiElementValidationFileFinder of(PsiElement element) {
+	public static boolean hasCorrespondingValidationFiles(PsiElement element) {
+		return !find(element).isEmpty();
+	}
+
+	public static Set<VirtualFile> find(PsiElement element) {
 		Project project = element.getProject();
-		Module currentModule = ModuleUtilCore.findModuleForFile(element.getContainingFile());
-		return new PsiElementValidationFileFinder(element, project, currentModule);
-	}
+		Module module = ModuleUtilCore.findModuleForFile(element.getContainingFile());
 
-	public boolean hasCorrespondingValidationFiles() {
-		return !findCorrespondingValidationFiles().isEmpty();
-	}
-
-	public List<VirtualFile> findCorrespondingValidationFiles() {
-		VirtualFile moduleRoot = getModuleRoot();
+		VirtualFile moduleRoot = getModuleRoot(project, module);
 		if (moduleRoot == null) {
-			return Collections.emptyList();
+			return Collections.emptySet();
 		}
 
-		List<String> validationFilePathPrefixes = Arrays.stream(JoiningStrategy.values())
-				.map(this::parseValidationFilePrefix)
-				.toList();
-
-		return getValidationFileRelatedDirectories()
-				.map(moduleRoot::findFileByRelativePath)
-				.filter(Objects::nonNull)
-				.flatMap(rootDir -> streamMatchingValidationFiles(rootDir, validationFilePathPrefixes))
-				.distinct()
-				.toList();
+		Set<VirtualFile> foundFilesOrDirectories = new LinkedHashSet<>();
+		for (String directory : getRelevantDirectories(project)) {
+			VirtualFile rootDir = moduleRoot.findFileByRelativePath(directory);
+			for (JoiningStrategy joiningStrategy : JoiningStrategy.values()) {
+				foundFilesOrDirectories.addAll(findMatchingFilesAndDirectories(rootDir, element, joiningStrategy));
+			}
+		}
+		return foundFilesOrDirectories;
 	}
 
-	private static Stream<VirtualFile> streamMatchingValidationFiles(VirtualFile rootDir, List<String> expectedValidationFilePathPrefixes) {
-		Stream.Builder<VirtualFile> streamBuilder = Stream.builder();
-
-		ContentIterator virtualFileVisitor = file -> {
-			if (file.isDirectory()) {
-				return true;
+	private static Set<VirtualFile> findMatchingFilesAndDirectories(VirtualFile rootDir, PsiElement element, JoiningStrategy joiningStrategy) {
+		Set<VirtualFile> foundFilesOrDirectoriesInner = new LinkedHashSet<>();
+		String prefixPath = joiningStrategy.addToPath(rootDir.toNioPath(), element).toAbsolutePath().toString();
+		ContentIterator contentIterator = file -> {
+			if (file.toNioPath().toAbsolutePath().toString().startsWith(prefixPath)) {
+				foundFilesOrDirectoriesInner.add(file);
 			}
-
-			Path relativizedValidationFilePath = rootDir.toNioPath().relativize(file.toNioPath());
-			for (String expectedValidationFilePathPrefix : expectedValidationFilePathPrefixes) {
-				if (isValidationFileMatchingPathPrefix(relativizedValidationFilePath, expectedValidationFilePathPrefix)) {
-					streamBuilder.add(file);
-				}
-			}
-
 			return true;
 		};
-
-		VfsUtilCore.iterateChildrenRecursively(rootDir, null, virtualFileVisitor);
-
-		return streamBuilder.build();
+		VfsUtilCore.iterateChildrenRecursively(rootDir, null, contentIterator);
+		return foundFilesOrDirectoriesInner;
 	}
 
-	private static boolean isValidationFileMatchingPathPrefix(Path actualValidationFilePath, String expectedValidationFilePathPrefixString) {
-		Path actualValidationFileParent = actualValidationFilePath.getParent();
-		String actualValidationFilename = actualValidationFilePath.getFileName().toString();
-
-		Path expectedValidationFilePathPrefix = Paths.get(expectedValidationFilePathPrefixString);
-		Path expectedValidationFileParent = expectedValidationFilePathPrefix.getParent();
-		String expectedValidationFilenamePrefix = expectedValidationFilePathPrefix.getFileName().toString();
-
-		boolean parentsAreEqual = Objects.equals(actualValidationFileParent, expectedValidationFileParent);
-		boolean filenameStartsWithPrefix = actualValidationFilename.startsWith(expectedValidationFilenamePrefix);
-		boolean parentsAreEqualAndIsFilenamePrefix = parentsAreEqual && filenameStartsWithPrefix;
-		return parentsAreEqualAndIsFilenamePrefix || actualValidationFilePath.startsWith(expectedValidationFilePathPrefix);
-	}
-
-	private Stream<String> getValidationFileRelatedDirectories() {
+	private static List<String> getRelevantDirectories(Project project) {
 		ValidationDiffProjectOptionsProvider options = ValidationDiffProjectOptionsProvider.getInstance(project);
-		return Stream.of(options.getRelativeOutputDirPath(), options.getRelativeValidationDirPath());
+		return List.of(options.getRelativeOutputDirPath(), options.getRelativeValidationDirPath());
 	}
 
-	private String parseValidationFilePrefix(JoiningStrategy joiningStrategy) {
-		if (element instanceof PsiMethod psiMethod) {
-			PsiClass psiClass = psiMethod.getContainingClass();
-			return PsiTestNameUtils.getTestName(psiClass, psiMethod, joiningStrategy);
-		}
-
-		if (element instanceof PsiClass psiClass) {
-			return PsiTestNameUtils.getTestClassName(psiClass, joiningStrategy);
-		}
-		return null;
-	}
-
-	private LocalFileSystem getLocalFileSystem() {
+	private static LocalFileSystem getLocalFileSystem() {
 		return (LocalFileSystem) VirtualFileManager
 				.getInstance()
 				.getFileSystem(LocalFileSystem.PROTOCOL);
 	}
 
-	private VirtualFile getModuleRoot() {
+	private static VirtualFile getModuleRoot(Project project, Module module) {
 		Module[] modules = ModuleManager.getInstance(project).getModules();
 		Path moduleRootPath = new ModuleAnalyser(module, modules).getMatchingContentRootForNextNonLeafModule();
 		if (moduleRootPath == null) {
