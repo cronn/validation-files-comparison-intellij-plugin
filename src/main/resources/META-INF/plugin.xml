@@ -43,11 +43,9 @@
     </description>
 
     <change-notes><![CDATA[
-        <p>2.0:</p>
+        <p>2.0.1:</p>
         <ul>
-            <li><b>New Feature:</b> Renaming tests that have validation or output files that are derivable from the test
-            name are now suggested to be renamed as well.</li>
-            <li>Fix deprecation warning</li>
+            <li>Fix bug when validation file directory does not exist</li>
         </ul>
         ]]>
     </change-notes>
