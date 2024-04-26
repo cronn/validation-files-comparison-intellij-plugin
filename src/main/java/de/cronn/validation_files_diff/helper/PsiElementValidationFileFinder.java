@@ -40,6 +40,9 @@ public final class PsiElementValidationFileFinder {
 		Set<VirtualFile> foundFilesOrDirectories = new LinkedHashSet<>();
 		for (String directory : getRelevantDirectories(project)) {
 			VirtualFile rootDir = moduleRoot.findFileByRelativePath(directory);
+			if (rootDir == null) {
+				continue;
+			}
 			for (JoiningStrategy joiningStrategy : JoiningStrategy.values()) {
 				foundFilesOrDirectories.addAll(findMatchingFilesAndDirectories(rootDir, element, joiningStrategy));
 			}
