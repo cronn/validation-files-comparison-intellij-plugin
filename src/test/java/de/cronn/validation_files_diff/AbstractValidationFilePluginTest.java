@@ -35,13 +35,13 @@ public abstract class AbstractValidationFilePluginTest {
 	protected Project project;
 
 	@BeforeEach
-	void setUp() throws IOException {
+	protected void setUp() throws Exception {
 		project = projectModel.getProject();
 		TestApplicationManager.getInstance().setDataProvider(new TestDataProvider(project));
 	}
 
 	@AfterEach
-	void tearDown() {
+	protected void tearDown() throws Exception {
 		TestApplicationManager.getInstance().setDataProvider(null);
 		ValidationDiffApplicationOptionsProvider.getInstance().reset();
 	}
@@ -76,7 +76,7 @@ public abstract class AbstractValidationFilePluginTest {
 		AbstractValidationFilePluginTest.createDirectoryAndFileIfNecessary(AbstractValidationFilePluginTest.getOutputFileDirectory(projectDir).resolve(validationFileName));
 	}
 
-	private static void createDirectoryAndFileIfNecessary(Path filename) throws IOException {
+	protected static void createDirectoryAndFileIfNecessary(Path filename) throws IOException {
 		Files.createDirectories(filename.getParent());
 		Files.createFile(filename);
 	}

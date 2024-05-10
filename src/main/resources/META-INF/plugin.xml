@@ -77,5 +77,13 @@
                           anchor="after"/>
             <add-to-group group-id="TestTreePopupMenu" anchor="last"/>
         </action>
+        <action id="GotoValidation" class="de.cronn.validation_files_diff.action.GoToValidationFileAction"
+                text="Go to Validation File">
+            <keyboard-shortcut keymap="$default" first-keystroke="shift alt F"/>
+            <add-to-group group-id="EditorPopupMenu.GoTo" relative-to-action="GotoTest"
+                          anchor="after"/>
+            <add-to-group group-id="GoToCodeGroup" relative-to-action="GotoTest"
+                          anchor="after"/>
+        </action>
     </actions>
 </idea-plugin>
