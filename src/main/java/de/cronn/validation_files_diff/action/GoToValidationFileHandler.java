@@ -4,7 +4,6 @@ import com.intellij.codeInsight.navigation.GotoTargetHandler;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtilCore;
 import de.cronn.validation_files_diff.helper.PsiElementValidationFileFinder;
@@ -13,9 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class GoToValidationFileHandler extends GotoTargetHandler {
 	@Override
@@ -33,21 +30,10 @@ public class GoToValidationFileHandler extends GotoTargetHandler {
 		}
 		PsiElement psiElement = surroundingElement.get();
 		List<PsiFileSystemItem> list = PsiElementValidationFileFinder
-				.find(psiElement)
-				.stream()
-				.map(virtualFile -> getFileSystemItem(psiElement, virtualFile))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
+				.streamFiles(psiElement)
 				.filter(psiFileSystemItem -> !psiFileSystemItem.isDirectory())
 				.toList();
 		return new GotoTargetHandler.GotoData(psiElement, PsiUtilCore.toPsiElementArray(list), List.of());
-	}
-
-	private Optional<PsiFileSystemItem> getFileSystemItem(PsiElement psiElement, VirtualFile virtualFile) {
-		PsiManager psiManager = PsiManager.getInstance(psiElement.getProject());
-		return Stream.of(psiManager.findFile(virtualFile), psiManager.findDirectory(virtualFile))
-					 .filter(Objects::nonNull)
-					 .findFirst();
 	}
 
 	private Optional<PsiElement> getSurroundingMethodOrClass(PsiElement element) {
