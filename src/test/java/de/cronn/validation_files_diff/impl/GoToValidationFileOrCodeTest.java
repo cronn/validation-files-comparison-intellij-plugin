@@ -10,8 +10,8 @@ import com.intellij.testFramework.TestActionEvent;
 import de.cronn.assertions.validationfile.junit5.JUnit5ValidationFileAssertions;
 import de.cronn.validation_files_diff.AbstractValidationFilePluginTest;
 import de.cronn.validation_files_diff.JoiningStrategy;
-import de.cronn.validation_files_diff.action.GoToValidationFileAction;
-import de.cronn.validation_files_diff.action.GoToValidationFileHandler;
+import de.cronn.validation_files_diff.action.GoToValidationFileOrCodeAction;
+import de.cronn.validation_files_diff.action.GoToValidationFileOrCodeHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +24,8 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.intellij.codeInsight.navigation.GotoTargetHandler.GotoData;
 import static de.cronn.assertions.validationfile.TestData.TEST_OUTPUT_DATA_DIR;
@@ -32,13 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class GoToValidationFileTest extends AbstractValidationFilePluginTest implements JUnit5ValidationFileAssertions {
+class GoToValidationFileOrCodeTest extends AbstractValidationFilePluginTest implements JUnit5ValidationFileAssertions {
 	private static final String TEST_FILE_PATH = "src/test/Test.java";
 
 	private Path projectDir;
 
-	private GoToValidationFileAction action;
-	private GoToValidationFileHandler handler;
+	private GoToValidationFileOrCodeAction action;
+	private GoToValidationFileOrCodeHandler handler;
 	private GotoDataCaptor gotoDataCaptor;
 
 	@Override
@@ -48,8 +50,8 @@ class GoToValidationFileTest extends AbstractValidationFilePluginTest implements
 
 		projectDir = createSampleProject();
 
-		action = spy(GoToValidationFileAction.class);
-		handler = spy(GoToValidationFileHandler.class);
+		action = spy(GoToValidationFileOrCodeAction.class);
+		handler = spy(GoToValidationFileOrCodeHandler.class);
 		when(action.getHandler()).thenReturn(handler);
 		gotoDataCaptor = new GotoDataCaptor();
 		doAnswer(gotoDataCaptor).when(handler).getSourceAndTargetElements(any(), any());
@@ -72,9 +74,6 @@ class GoToValidationFileTest extends AbstractValidationFilePluginTest implements
 		@Override
 		public GotoData answer(InvocationOnMock invocationOnMock) throws Throwable {
 			GotoData result = (GotoData) invocationOnMock.callRealMethod();
-			if (result == null) {
-				return null;
-			}
 			targets = result.targets;
 			if (result.targets.length > 1) {
 				// Remove targets in order not to open a chooser popup window which would have to be handled in tests
@@ -195,7 +194,99 @@ class GoToValidationFileTest extends AbstractValidationFilePluginTest implements
 		testAction();
 
 		assertThat(getOpenedFilePath()).isEqualTo(getProjectFilePath(projectDir, TEST_FILE_PATH));
-		assertThat(gotoDataCaptor.getTargets()).isNull();
+		assertThat(gotoDataCaptor.getTargets()).hasSize(0);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+			// folders
+			"~o/Class.txt, <!C!>", // output folder
+			"~v/Class.txt, <!C!>", // validation folder
+
+			// class
+			"~v/Class, <!C!>", // as file name
+			"~v/Class/, <!C!>", // as directory
+			"~v/Class.txt, <!C!>", // with extension
+			"~v/Class_other.txt, <!C!>", // with continuation
+			"~v/Class/other.txt, <!C!>", // in directory strategy with continuation
+			"~v/Class2, <!C2!>", // as prefix in name not regarded
+			"~v/_Class2, <!_C2!>", // with underscore
+
+			// method
+			"~v/Class_method2.txt, <!C!>", // method as prefix not matching
+			"~v/Class_method, <!C/m!>", // as file name
+			"~v/Class_method/, <!C/m!>", // as directory
+			"~v/Class_method.txt, <!C/m!>", // with extension
+			"~v/Class_method_other.txt, <!C/m!>", // with continuation
+			"~v/Class_method/other.txt, <!C/m!>", // mixed strategy with continuation
+			"~v/Class/method2.txt, <!C!>", // method as prefix in directory strategy not matching
+			"~v/Class/method, <!C/m!>", // in directory strategy
+			"~v/Class/method/, <!C/m!>", // as directory in directory strategy
+			"~v/Class/method.txt, <!C/m!>", // in directory strategy with continuation
+			"~v/Class/method/other.txt, <!C/m!>", // as directory in directory strategy with continuation
+			"~v/Class/method_other.txt, <!C/m!>", // mixed strategy with continuation
+
+			// inner class
+			"~v/Class2_Class21, <!C2/C21!>", // as file name
+			"~v/Class2_Class21/, <!C2/C21!>", // as directory
+			"~v/Class2_Class21_other.txt, <!C2/C21!>", // with continuation
+			"~v/Class2/Class21, <!C2/C21!>", // in directory strategy
+			"~v/Class2/Class21/, <!C2/C21!>", // in directory strategy as directory
+			"~v/Class2/Class21/other.txt, <!C2/C21!>", // in directory strategy as directory with continuation
+
+			// innerest class
+			"~v/Class2_Class21_Class211.txt, <!C2/C21/C211!>", // as file name
+			"~v/Class2/Class21/Class211.txt, <!C2/C21/C211!>", // in directory strategy
+
+			// innerest class method
+			"~v/Class2_Class21_Class211_method1, <!C2/C21/C211/m1!>", // as file name
+			"~v/Class2/Class21/Class211/method1, <!C2/C21/C211/m1!>", // in directory strategy
+	})
+	void testJumpIntoCodeIfOnlyOneTargetFound(String validationFilePath, String caretId) throws Exception {
+		createFile(projectDir, TEST_FILE_PATH, getContent());
+		createAndOpenFile(projectDir, expand(validationFilePath), null, null);
+		refreshFileSystem(projectDir);
+
+		testAction();
+
+		assertThat(getOpenedFilePath()).isEqualTo(getProjectFilePath(projectDir, TEST_FILE_PATH));
+		assertThat(gotoDataCaptor.getTargets()).hasSize(1);
+		assertThat(getCaretInOpenedFile().getOffset()).isEqualTo(getCaretPosition(getContent(), caretId));
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+			"~v/_Class2_Class21, <!_C2/C21!> + <!_C2/_C21!> + <!_C2/c21!>",
+			"~v/_Class2/Class21, <!_C2/C21!> + <!_C2/_C21!> + <!_C2/c21!>",
+			"~v/_Class2_Class21_method1, <!_C2/C21/m1!> + <!_C2/C21/_m1!> + <!_C2/_C21/m1!> + <!_C2/_C21/_m1!> + <!_C2/c21!> + <!_C2/c21m1!>",
+			"~v/_Class2_Class21__method1, <!_C2/C21/m1!> + <!_C2/C21/_m1!> + <!_C2/_C21/m1!> + <!_C2/_C21/_m1!> + <!_C2/c21!> + <!_C2/c21m1!>",
+	})
+	void testGoToCodeTarget_withMultipleTargets(String validationFilePath, String codeTargets) throws Exception {
+		createFile(projectDir, TEST_FILE_PATH, getContent());
+		String path = expand(validationFilePath);
+		createAndOpenFile(projectDir, path, null, null);
+		refreshFileSystem(projectDir);
+
+		testAction();
+
+		List<Integer> expectedCaretPositions = Arrays.stream(codeTargets.split(" \\+ "))
+													 .map(codeTarget -> getCaretPosition(getContent(), codeTarget))
+													 .toList();
+		List<Integer> actualCaretPositions = Arrays.stream(gotoDataCaptor.targets).map(PsiElement::getTextOffset).toList();
+		assertThat(actualCaretPositions).containsExactlyElementsOf(expectedCaretPositions);
+		assertThat(getOpenedFilePath()).isEqualTo(getProjectFilePath(projectDir, path));
+	}
+
+	@Test
+	void testGoToCodeTarget_withoutResult() throws Exception {
+		String validationFilePath = expand("~v/Class.txt");
+		createAndOpenFile(projectDir, validationFilePath, null, null);
+		refreshFileSystem(projectDir);
+
+		testAction();
+
+		assertThat(getOpenedFilePath()).isEqualTo(getProjectFilePath(projectDir, validationFilePath));
+		assertThat(gotoDataCaptor.getTargets()).hasSize(0);
 	}
 
 	private void testAction() {
