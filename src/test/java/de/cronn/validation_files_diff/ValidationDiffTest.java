@@ -16,6 +16,7 @@ import de.cronn.validation_files_diff.helper.DiffSide;
 import de.cronn.validation_files_diff.helper.ModuleAnalyser;
 import de.cronn.validation_files_diff.impl.ValidationDiffApplicationOptionsProviderImpl;
 import de.cronn.validation_files_diff.impl.ValidationDiffProjectOptionsProviderImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +41,11 @@ class ValidationDiffTest {
 	@BeforeEach
 	public void setUp() {
 		setupGeneralMocks();
+	}
+
+	@AfterEach
+	void tearDown() {
+		Disposer.dispose(disposable);
 	}
 
 	@Test
