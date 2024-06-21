@@ -50,9 +50,9 @@
     </description>
 
     <change-notes><![CDATA[
-        <p>2.0.1:</p>
+        <p>2.1:</p>
         <ul>
-            <li>Fix bug when validation file directory does not exist</li>
+            <li>New Feature: Jump between code and validation file</li>
         </ul>
         ]]>
     </change-notes>
