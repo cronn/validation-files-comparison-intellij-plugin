@@ -6,6 +6,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,11 @@ class ModuleAnalyserTest {
 	public void setUp() {
 		disposable = Disposer.newDisposable();
 		MockApplication.setUp(disposable);
+	}
+
+	@AfterEach
+	void tearDown() {
+		Disposer.dispose(disposable);
 	}
 
 	@Test
@@ -91,7 +97,6 @@ class ModuleAnalyserTest {
 	@Test
 	void testFindPossibleParentModules() {
 		MockProject project = new MockProjectEx(disposable);
-		Disposable disposable = mock(Disposable.class);
 
 		MockModule currentModule = new MockModule(project, disposable).setName("project.subproject.test");
 		MockModule projectModule = new MockModule(project, disposable).setName("project");

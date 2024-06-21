@@ -10,14 +10,14 @@ import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFileSystemItem;
+import com.intellij.psi.PsiManager;
 import de.cronn.validation_files_diff.JoiningStrategy;
 import de.cronn.validation_files_diff.ValidationDiffProjectOptionsProvider;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
 public final class PsiElementValidationFileFinder {
 
@@ -26,6 +26,21 @@ public final class PsiElementValidationFileFinder {
 
 	public static boolean hasCorrespondingValidationFiles(PsiElement element) {
 		return !find(element).isEmpty();
+	}
+
+	public static Stream<PsiFileSystemItem> streamFiles(PsiElement element) {
+		return find(element)
+				.stream()
+				.map(virtualFile -> getFileSystemItem(element, virtualFile))
+				.filter(Optional::isPresent)
+				.map(Optional::get);
+	}
+
+	private static Optional<PsiFileSystemItem> getFileSystemItem(PsiElement psiElement, VirtualFile virtualFile) {
+		PsiManager psiManager = PsiManager.getInstance(psiElement.getProject());
+		return Stream.of(psiManager.findFile(virtualFile), psiManager.findDirectory(virtualFile))
+					 .filter(Objects::nonNull)
+					 .findFirst();
 	}
 
 	public static Set<VirtualFile> find(PsiElement element) {

@@ -13,7 +13,12 @@
         <br/>
         <p>IntelliJ plugin as extension to
         cronn&#39;s <a href="https://github.com/cronn/validation-file-assertions">validation file assertion library</a>.<br>
-        Compare and accept output and validation files without context switches.</p>
+        Compare and accept output and validation files without context switches.<br>
+        Further features:</p>
+        <ul>
+        <li>Rename related validation files when methods or classes are renamed</li>
+        <li>Jump to related validation file from code and vice-versa</li>
+        </ul>
         <h2 id="usage">Usage</h2>
         <h3 id="open-validation-file-comparison">Open Validation-File Comparison</h3>
         <p>Execute tests which use validation files, open the test itself or open the production code for it and run the the
@@ -32,6 +37,8 @@
         <p>When renaming a test with validation files the validation and output files will be suggested for renaming as well.
         Simply use the rename refactoring of intellij (<code>Shift+F6</code> / <code>⇧F6</code>) and apply the suggested renaming as wished.
         To disable this feature simply trigger the keybinding for the renaming twice and deselect &quot;Rename validation and output files&quot;.</p>
+        <h3 id="jump-to-validation-file-or-code">Jump to Validation File or Code</h3>
+        <p>Similar to IntelliJ&#39;s build-in action for switching between tests and implementations, it is possible to directly jump into the according validation file from a test and back. Simply press the default shortcut <code>Alt+Shift+F</code> /<code>⌥⇧F</code> and the according file is opened at the relevant position. If there are multiple possible targets, a selection window with all targets is presented. This action can be used from within a test method as well as for the whole test class. When used from a validation file, it finds the deepest possible code target to jump to, also regarding nested test classes and methods with multiple validation files.</p>
         <h3 id="configuration">Configuration</h3>
         <p>As for every IntelliJ action, you can configure your own shortcut for the <code>Validation-File Comparison</code> action.
         Simply go to <a href="jetbrains://idea/settings?name=Keymap"><strong>File | Settings | Keymap</strong></a> , search for <code>Validation-File
@@ -43,9 +50,9 @@
     </description>
 
     <change-notes><![CDATA[
-        <p>2.0.1:</p>
+        <p>2.1:</p>
         <ul>
-            <li>Fix bug when validation file directory does not exist</li>
+            <li>New Feature: Jump between code and validation file</li>
         </ul>
         ]]>
     </change-notes>
@@ -76,6 +83,14 @@
             <add-to-group group-id="ConsoleEditorPopupMenu" relative-to-action="CompareClipboardWithSelection"
                           anchor="after"/>
             <add-to-group group-id="TestTreePopupMenu" anchor="last"/>
+        </action>
+        <action id="GotoValidation" class="de.cronn.validation_files_diff.action.GoToValidationFileOrCodeAction"
+                text="Go to Validation File or Code">
+            <keyboard-shortcut keymap="$default" first-keystroke="shift alt F"/>
+            <add-to-group group-id="EditorPopupMenu.GoTo" relative-to-action="GotoTest"
+                          anchor="after"/>
+            <add-to-group group-id="GoToCodeGroup" relative-to-action="GotoTest"
+                          anchor="after"/>
         </action>
     </actions>
 </idea-plugin>

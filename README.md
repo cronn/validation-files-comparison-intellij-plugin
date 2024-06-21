@@ -7,7 +7,10 @@
 
 IntelliJ plugin as extension to
 cronn's [validation file assertion library](https://github.com/cronn/validation-file-assertions).<br>
-Compare and accept output and validation files without context switches.
+Compare and accept output and validation files without context switches.<br>
+Further features:
+* Rename related validation files when methods or classes are renamed
+* Jump to related validation file from code and vice-versa
 
 ![](doc/usage.gif)
 
@@ -39,6 +42,10 @@ for [validation file assertion library](https://github.com/cronn/validation-file
 When renaming a test with validation files the validation and output files will be suggested for renaming as well. 
 Simply use the rename refactoring of intellij (`Shift+F6` / `⇧F6`) and apply the suggested renaming as wished.
 To disable this feature simply trigger the keybinding for the renaming twice and deselect "Rename validation and output files".
+
+### Jump to Validation File or Code
+
+Similar to IntelliJ's build-in action for switching between tests and implementations, it is possible to directly jump into the according validation file from a test and back. Simply press the default shortcut `Alt+Shift+F` /`⌥⇧F` and the according file is opened at the relevant position. If there are multiple possible targets, a selection window with all targets is presented. This action can be used from within a test method as well as for the whole test class. When used from a validation file, it finds the deepest possible code target to jump to, also regarding nested test classes and methods with multiple validation files.
 
 ### Configuration
 

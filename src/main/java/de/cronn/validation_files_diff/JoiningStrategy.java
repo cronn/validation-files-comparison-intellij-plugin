@@ -41,4 +41,7 @@ public enum JoiningStrategy {
 		return current.resolve(getPrefix(element));
 	}
 
+	public String getDelimiter() {
+		return delimiter;
+	}
 }
